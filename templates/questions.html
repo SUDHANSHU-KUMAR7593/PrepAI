@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% set shell = true %}
+{% set title = "AI Question Generator - PrepAI" %}
+
+{% block content %}
+<section class="page narrow">
+  <header class="page-header">
+    <div>
+      <h1>AI Question Generator</h1>
+      <p>Pick a topic and let AI craft realistic interview questions.</p>
+    </div>
+  </header>
+
+  <form class="panel form-grid" method="post">
+    <label class="span-all">Topic or role
+      <input name="topic" placeholder="e.g. React hooks, Dynamic programming, Product manager intro" required>
+    </label>
+    <label>Type
+      <select name="question_type">
+        <option value="technical">Technical</option>
+        <option value="behavioral">Behavioral</option>
+        <option value="hr">HR</option>
+        <option value="system-design">System Design</option>
+      </select>
+    </label>
+    <label>Difficulty
+      <select name="difficulty">
+        <option value="easy">Easy</option>
+        <option value="medium" selected>Medium</option>
+        <option value="hard">Hard</option>
+      </select>
+    </label>
+    <label>Count
+      <input type="number" name="count" min="3" max="10" value="5">
+    </label>
+    <button class="button" type="submit">Generate</button>
+  </form>
+
+  {% if results %}
+    <section>
+      <h2>Your questions</h2>
+      <div class="accordion panel">
+        {% for item in results %}
+          <details>
+            <summary><span>{{ loop.index }}.</span> {{ item.question }}</summary>
+            <p>{{ item.answer }}</p>
+          </details>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+</section>
+{% endblock %}

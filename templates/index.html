@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% set title = "PrepAI - AI Interview Preparation" %}
+
+{% block public_content %}
+<header class="topbar">
+  <a class="brand" href="{{ url_for('index') }}">
+    <span class="brand-mark">✦</span>
+    <span>PrepAI</span>
+  </a>
+  <nav class="top-actions">
+    <a class="button ghost" href="{{ url_for('auth', mode='signin') }}">Sign in</a>
+    <a class="button" href="{{ url_for('auth', mode='signup') }}">Get started</a>
+  </nav>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="pill">Powered by AI</div>
+    <h1>Land your dream offer with <span>AI-powered</span> interview prep.</h1>
+    <p>
+      Generate realistic interview questions, practice timed mock interviews, and track your placement prep in one focused workspace.
+    </p>
+    <div class="hero-actions">
+      <a class="button large" href="{{ url_for('auth', mode='signup') }}">Start practicing free</a>
+      <a class="button outline large" href="#features">See features</a>
+    </div>
+    <div class="product-preview">
+      <div class="preview-grid">
+        <div><strong>AI Questions</strong><span>Ready to use</span></div>
+        <div><strong>Mock Interviews</strong><span>Timed practice</span></div>
+        <div><strong>Analytics</strong><span>Progress view</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" class="section">
+    <h2>Everything you need for your placement prep</h2>
+    <p>Built for students aiming at technical, consulting, and product roles.</p>
+    <div class="feature-grid">
+      <article>
+        <h3>AI Question Generator</h3>
+        <p>Generate technical, behavioral, HR, and system design questions tailored to a topic and difficulty.</p>
+      </article>
+      <article>
+        <h3>Mock Interview Mode</h3>
+        <p>Run timed practice sessions and review rubric-based feedback after every response.</p>
+      </article>
+      <article>
+        <h3>Progress Dashboard</h3>
+        <p>Track sessions, topics covered, and total questions practiced from your workspace.</p>
+      </article>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">© {{ year }} PrepAI. Built for ambitious students.</footer>
+{% endblock %}

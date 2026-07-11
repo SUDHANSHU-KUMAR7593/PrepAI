@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% set shell = true %}
+{% set title = ("Voice Mock Interview - PrepAI" if voice else "Mock Interview - PrepAI") %}
+
+{% block content %}
+<section class="page narrow" id="interview-app" data-voice="{{ 'true' if voice else 'false' }}">
+  <div id="setup-view">
+    <header class="page-header">
+      <div>
+        <h1>{{ "Voice Mock Interview" if voice else "Mock Interview" }}</h1>
+        <p>
+          {% if voice %}
+            Speak your answers out loud. PrepAI listens, scores each response, and gives feedback.
+          {% else %}
+            Run a timed Q&A session and get feedback with a performance score after each answer.
+          {% endif %}
+        </p>
+      </div>
+    </header>
+
+    <div class="notice hidden" id="voice-warning">Voice input is not supported in this browser. Try Chrome, Edge, or Safari desktop.</div>
+
+    <form class="panel form-grid" id="start-form">
+      <label>Topic
+        <input name="topic" placeholder="e.g. React, Operating Systems, Leadership" required>
+      </label>
+      <label>Target role (optional)
+        <input name="role" placeholder="e.g. Frontend Engineer">
+      </label>
+      <label>Type
+        <select name="questionType">
+          {% if voice %}
+            <option value="behavioral" selected>Behavioral</option>
+            <option value="technical">Technical</option>
+          {% else %}
+            <option value="technical" selected>Technical</option>
+            <option value="behavioral">Behavioral</option>
+          {% endif %}
+          <option value="hr">HR</option>
+          <option value="system-design">System Design</option>
+        </select>
+      </label>
+      <label>Difficulty
+        <select name="difficulty">
+          <option value="easy">Easy</option>
+          <option value="medium" selected>Medium</option>
+          <option value="hard">Hard</option>
+        </select>
+      </label>
+      <label>Questions
+        <input type="number" name="count" min="3" max="10" value="5">
+      </label>
+      <label>Seconds / question
+        <input type="number" name="secondsPerQuestion" min="30" max="600" step="15" value="120">
+      </label>
+      {% if voice %}
+        <label class="checkbox span-all">
+          <input type="checkbox" id="auto-speak" checked>
+          <span>Read each question aloud</span>
+        </label>
+      {% endif %}
+      <button class="button" type="submit">{{ "Start voice interview" if voice else "Start interview" }}</button>
+    </form>
+  </div>
+
+  <div id="interview-view" class="hidden">
+    <header class="page-header">
+      <div>
+        <div class="eyebrow" id="question-count"></div>
+        <h1 id="question-text"></h1>
+      </div>
+      <div class="timer" id="timer">0:00</div>
+    </header>
+    <div class="progress"><span id="progress-bar"></span></div>
+
+    {% if voice %}
+      <div class="panel voice-panel">
+        <div class="voice-tools">
+          <div><span id="mic-dot" class="dot"></span><span id="mic-label">Mic off</span></div>
+          <div>
+            <button class="button ghost" id="speak-question" type="button">Read aloud</button>
+            <button class="button outline" id="mic-toggle" type="button">Speak</button>
+          </div>
+        </div>
+        <p id="transcript" class="transcript">Your spoken answer will appear here...</p>
+      </div>
+    {% else %}
+      <textarea id="answer" rows="8" placeholder="Type your answer as you would speak it..."></textarea>
+    {% endif %}
+
+    <div id="answer-actions" class="actions">
+      <button class="button" id="submit-answer" type="button">Submit answer</button>
+      <button class="button ghost" id="skip-answer" type="button">Skip</button>
+    </div>
+
+    <div id="feedback-card" class="panel feedback hidden">
+      <div class="feedback-head">
+        <strong>AI Feedback</strong>
+        <span class="score" id="feedback-score"></span>
+      </div>
+      <div id="rubric" class="rubric"></div>
+      <h3>Strengths</h3>
+      <p id="feedback-strengths"></p>
+      <h3>Improvements</h3>
+      <p id="feedback-improvements"></p>
+      <h3>Suitable answer</h3>
+      <p id="feedback-ideal"></p>
+      <button class="button" id="next-question" type="button">Next question</button>
+    </div>
+  </div>
+
+  <div id="summary-view" class="hidden">
+    <header class="page-header">
+      <div>
+        <h1>Interview complete</h1>
+        <p>{{ "Voice session summary" if voice else "Here's how you performed." }}</p>
+      </div>
+      <button class="button outline" id="restart" type="button">New interview</button>
+    </header>
+    <div class="score-card">
+      <span>Overall performance score</span>
+      <strong id="overall-score">0.0 / 10</strong>
+    </div>
+    <div id="history" class="history"></div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='interview.js') }}"></script>
+{% endblock %}

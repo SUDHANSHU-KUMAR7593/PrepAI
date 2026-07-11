@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: prepai
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: SECRET_KEY
+        sync: false
+      - key: AI_API_KEY
+        sync: false
+      - key: AI_GATEWAY_URL
+        value: https://api.groq.com/openai/v1/chat/completions
+      - key: AI_MODEL
+        value: llama-3.3-70b-versatile

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% set shell = true %}
+{% set title = "Dashboard - PrepAI" %}
+
+{% block content %}
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Welcome back{% if current_user.full_name %}, {{ current_user.full_name.split(" ")[0] }}{% endif %}</h1>
+      <p>Pick up where you left off, or generate a fresh set.</p>
+    </div>
+    <div class="actions">
+      <a class="button outline" href="{{ url_for('mock_interview') }}">Mock interview</a>
+      <a class="button" href="{{ url_for('questions') }}">Generate questions</a>
+    </div>
+  </header>
+
+  <div class="stats">
+    <article><span>Sessions</span><strong>{{ sessions|length }}</strong></article>
+    <article><span>Questions practiced</span><strong>{{ total_questions }}</strong></article>
+    <article><span>Unique topics</span><strong>{{ topics }}</strong></article>
+  </div>
+
+  <section>
+    <h2>Recent sessions</h2>
+    <div class="list-panel">
+      {% if not sessions %}
+        <div class="empty">
+          <p>No sessions yet.</p>
+          <a class="button outline" href="{{ url_for('questions') }}">Generate your first set</a>
+        </div>
+      {% endif %}
+      {% for session in sessions %}
+        <div class="session-row">
+          <div>
+            <strong>{{ session.topic }}</strong>
+            <span>{{ session.question_type|replace("-", " ")|title }} · {{ session.difficulty|title }} · {{ session.questions|length }} questions</span>
+          </div>
+          <time>{{ session.created_at[:10] }}</time>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+</section>
+{% endblock %}

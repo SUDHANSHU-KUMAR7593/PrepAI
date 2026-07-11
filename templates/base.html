@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ title or "PrepAI" }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  </head>
+  <body>
+    {% if current_user and shell %}
+      <div class="app-shell">
+        <aside class="sidebar">
+          <a class="brand" href="{{ url_for('dashboard') }}">
+            <span class="brand-mark">✦</span>
+            <span>PrepAI</span>
+          </a>
+          <nav class="nav">
+            <a href="{{ url_for('dashboard') }}" class="{{ 'active' if request.endpoint == 'dashboard' else '' }}">Dashboard</a>
+            <a href="{{ url_for('questions') }}" class="{{ 'active' if request.endpoint == 'questions' else '' }}">AI Questions</a>
+            <a href="{{ url_for('mock_interview') }}" class="{{ 'active' if request.endpoint == 'mock_interview' else '' }}">Mock Interview</a>
+            <a href="{{ url_for('voice_interview') }}" class="{{ 'active' if request.endpoint == 'voice_interview' else '' }}">Voice Interview</a>
+          </nav>
+          <div class="sidebar-footer">
+            <div class="user-email">{{ current_user.email }}</div>
+            <form method="post" action="{{ url_for('logout') }}">
+              <button class="button ghost full" type="submit">Sign out</button>
+            </form>
+          </div>
+        </aside>
+        <main class="main">
+          {% include "partials/flash.html" %}
+          {% block content %}{% endblock %}
+        </main>
+      </div>
+    {% else %}
+      {% include "partials/flash.html" %}
+      {% block public_content %}{% endblock %}
+    {% endif %}
+    {% block scripts %}{% endblock %}
+  </body>
+</html>
