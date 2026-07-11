@@ -33,6 +33,23 @@ PrepAI is a Flask-based web application designed to help candidates practice for
 
 ---
 
+## 📁 Project Structure
+
+```text
+PrepAI/
+│
+├── app.py              # Main Flask application entry point & routes
+├── database.db         # SQLite database file (generated automatically)
+├── requirements.txt    # Python dependencies
+├── Procfile            # Deployment configuration (Render/Heroku)
+├── render.yaml         # Infrastructure blueprint for cloud deployment
+│
+├── static/             # Static assets (CSS, client-side JS, images)
+│   ├── css/
+│   └── js/
+│
+└── templates/          # HTML views (Login, Dashboard, Interview Room)
+
 ## 🔧 Getting Started
 
 ### Prerequisites
@@ -41,21 +58,38 @@ PrepAI is a Flask-based web application designed to help candidates practice for
 
 ### Installation
 
-1. Clone the repository:
-   ```bash
-   git clone [https://github.com/SUDHANSHU-KUMAR7593/PrepAI.git](https://github.com/SUDHANSHU-KUMAR7593/PrepAI.git)
-   cd PrepAI
-2. Create and activate a virtual environment:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-3.Install the required dependencies:
-  ```bash
-  pip install -r requirements.txt
-4.Set up your environment variables (Create a .env file):
-  ```bash
-  FLASK_SECRET_KEY=your_secret_key_here
-  AI_API_KEY=your_groq_or_openai_api_key_here
-5. Initialize the database and run the application:
-   ```bash
-   python app.py
+1. **Clone the repository:**
+```bash
+git clone [https://github.com/SUDHANSHU-KUMAR7593/PrepAI.git](https://github.com/SUDHANSHU-KUMAR7593/PrepAI.git)
+cd PrepAI
+
+2.**Create and activate a virtual environment:**
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+3.**Install the required dependencies:**
+```bash
+pip install -r requirements.txt
+
+4.**Set up your environment variables (Create a .env file):**
+Code snippet
+FLASK_SECRET_KEY=your_secret_key_here
+AI_API_KEY=your_groq_or_openai_api_key_here
+
+5.**Run the application:**
+``bash
+python app.py
+Open http://127.0.0.1:5000 in your web browser.
+
+---
+
+## 🚀 Future Roadmap
+
+* [ ] **LeetCode Code Execution:** Integrate an isolated sandbox environment to test actual programming solutions and run user code against test cases.
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
