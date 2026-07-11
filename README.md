@@ -34,22 +34,27 @@ PrepAI is a Flask-based web application designed to help candidates practice for
 ---
 
 ## 📁 Project Structure
-
 ```text
-PrepAI/
-│
-├── app.py              # Main Flask application entry point & routes
-├── database.db         # SQLite database file (generated automatically)
-├── requirements.txt    # Python dependencies
-├── Procfile            # Deployment configuration (Render/Heroku)
-├── render.yaml         # Infrastructure blueprint for cloud deployment
-│
-├── static/             # Static assets (CSS, client-side JS, images)
-│   ├── css/
-│   └── js/
-│
-└── templates/          # HTML views (Login, Dashboard, Interview Room)
-
+interview-ace-main/
+├── app.py
+├── prepai.sqlite3
+├── requirements.txt
+├── Procfile
+├── render.yaml
+├── .env.example
+├── static/
+│   ├── interview.js
+│   └── styles.css
+└── templates/
+    ├── auth.html
+    ├── base.html
+    ├── dashboard.html
+    ├── index.html
+    ├── mock_interview.html
+    ├── questions.html
+    └── partials/
+        └── flash.html
+```
 ## 🔧 Getting Started
 
 ### Prerequisites
