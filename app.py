@@ -137,7 +137,7 @@ def clamp_int(value, minimum, maximum, fallback):
 def ai_config():
     return {
         "api_key": os.getenv("AI_API_KEY"),
-        "model": os.getenv("AI_MODEL", "gemini-2.0-flash"),
+        "model": os.getenv("AI_MODEL", "gemini-3.6-flash"),
     }
 
 
