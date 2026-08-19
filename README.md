@@ -1,4 +1,4 @@
-# PrepAI - AI Interview Preparation Platform
+# PrepAI - AI Powered Interview Preparation Platform
 
 PrepAI is a Flask-based web application designed to help candidates practice for technical, behavioral, HR, and system-design interviews. Using AI, the platform generates realistic interview questions, conducts timed mock interviews, provides rubric-based feedback, and tracks user progress locally.
 
