@@ -137,191 +137,149 @@ def clamp_int(value, minimum, maximum, fallback):
 def ai_config():
     return {
         "api_key": os.getenv("AI_API_KEY"),
-        "gateway_url": os.getenv("AI_GATEWAY_URL", "https://api.groq.com/openai/v1/chat/completions"),
-        "model": os.getenv("AI_MODEL", "llama-3.3-70b-versatile"),
+        "model": os.getenv("AI_MODEL", "gemini-1.5-flash"),
     }
 
 
-def call_ai(payload):
+def call_ai(contents, system_instruction, response_schema):
+    """Call Google Gemini generateContent API with structured JSON output."""
     cfg = ai_config()
     if not cfg["api_key"]:
-        raise RuntimeError("AI_API_KEY is missing. Add your Groq API key to .env and restart Flask.")
-    response = requests.post(
-        cfg["gateway_url"],
-        headers={"Authorization": f"Bearer {cfg['api_key']}", "Content-Type": "application/json"},
-        json={**payload, "model": cfg["model"]},
-        timeout=30,
+        raise RuntimeError("AI_API_KEY is missing. Add your Google Gemini API key to .env and restart Flask.")
+    url = (
+        f"https://generativelanguage.googleapis.com/v1beta/models/"
+        f"{cfg['model']}:generateContent?key={cfg['api_key']}"
     )
+    payload = {
+        "systemInstruction": {
+            "parts": [{"text": system_instruction}]
+        },
+        "contents": contents,
+        "generationConfig": {
+            "responseMimeType": "application/json",
+            "responseSchema": response_schema,
+            "temperature": 0.7,
+        },
+    }
+    response = requests.post(url, headers={"Content-Type": "application/json"}, json=payload, timeout=60)
     if response.status_code == 429:
         raise RuntimeError("Rate limit hit. Try again shortly.")
-    if response.status_code == 402:
-        raise RuntimeError("AI credits exhausted.")
+    if response.status_code == 403:
+        raise RuntimeError("Invalid or unauthorized Gemini API key.")
     if not response.ok:
-        raise RuntimeError(f"AI request failed with status {response.status_code}: {response.text[:300]}")
+        raise RuntimeError(f"Gemini API request failed ({response.status_code}): {response.text[:300]}")
     return response.json()
 
 
-def parse_tool_args(payload):
+def parse_gemini_response(payload):
+    """Extract and parse the JSON text from a Gemini generateContent response."""
     try:
-        args = payload["choices"][0]["message"]["tool_calls"][0]["function"]["arguments"]
-        return json.loads(args)
+        text = payload["candidates"][0]["content"]["parts"][0]["text"]
+        return json.loads(text)
     except (TypeError, KeyError, IndexError, json.JSONDecodeError):
         return None
 
 
 def generate_ai_question_answers(topic, question_type, difficulty, count):
-    payload = {
-        "messages": [
-            {
-                "role": "system",
-                "content": (
-                    "You are an expert technical interviewer who generates high-quality, realistic "
-                    "interview questions. Always respond by calling the provided tool."
-                ),
-            },
-            {
-                "role": "user",
-                "content": (
-                    f'Generate {count} {difficulty} {question_type} interview questions about: "{topic}". '
-                    "For each, provide a concise model answer in 3-5 sentences."
-                ),
-            },
-        ],
-        "tools": [
-            {
-                "type": "function",
-                "function": {
-                    "name": "return_questions",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "questions": {
-                                "type": "array",
-                                "items": {
-                                    "type": "object",
-                                    "properties": {"question": {"type": "string"}, "answer": {"type": "string"}},
-                                    "required": ["question", "answer"],
-                                    "additionalProperties": False,
-                                },
-                            }
-                        },
-                        "required": ["questions"],
-                        "additionalProperties": False,
+    system = (
+        "You are an expert technical interviewer who generates high-quality, realistic interview questions. "
+        "Always respond with valid JSON matching the provided schema."
+    )
+    contents = [{
+        "role": "user",
+        "parts": [{"text": (
+            f'Generate {count} {difficulty} {question_type} interview questions about: "{topic}". '
+            "For each, provide a concise model answer in 3-5 sentences."
+        )}]
+    }]
+    schema = {
+        "type": "object",
+        "properties": {
+            "questions": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "question": {"type": "string"},
+                        "answer": {"type": "string"}
                     },
-                },
+                    "required": ["question", "answer"]
+                }
             }
-        ],
-        "tool_choice": {"type": "function", "function": {"name": "return_questions"}},
+        },
+        "required": ["questions"]
     }
-    payload = call_ai(payload)
-    parsed = parse_tool_args(payload)
+    raw = call_ai(contents, system, schema)
+    parsed = parse_gemini_response(raw)
     if not parsed or not parsed.get("questions"):
-        raise RuntimeError("AI did not return valid question answers. Try a Groq model with tool support.")
+        raise RuntimeError("Gemini did not return valid question answers.")
     return parsed["questions"]
 
 
 def generate_ai_interview_questions(topic, role, question_type, difficulty, count):
     role_text = f" for a {role}" if role else ""
-    payload = {
-        "messages": [
-            {
-                "role": "system",
-                "content": "You are a senior interviewer. Return a clean list of interview questions only.",
-            },
-            {
-                "role": "user",
-                "content": (
-                    f'Create {count} {difficulty} {question_type} interview questions{role_text} '
-                    f'on: "{topic}". Make them progressive in difficulty.'
-                ),
-            },
-        ],
-        "tools": [
-            {
-                "type": "function",
-                "function": {
-                    "name": "return_questions",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {"questions": {"type": "array", "items": {"type": "string"}}},
-                        "required": ["questions"],
-                        "additionalProperties": False,
-                    },
-                },
+    system = "You are a senior interviewer. Return a clean list of interview questions only."
+    contents = [{
+        "role": "user",
+        "parts": [{"text": (
+            f'Create {count} {difficulty} {question_type} interview questions{role_text} '
+            f'on: "{topic}". Make them progressive in difficulty.'
+        )}]
+    }]
+    schema = {
+        "type": "object",
+        "properties": {
+            "questions": {
+                "type": "array",
+                "items": {"type": "string"}
             }
-        ],
-        "tool_choice": {"type": "function", "function": {"name": "return_questions"}},
+        },
+        "required": ["questions"]
     }
-    payload = call_ai(payload)
-    parsed = parse_tool_args(payload)
+    raw = call_ai(contents, system, schema)
+    parsed = parse_gemini_response(raw)
     if not parsed or not parsed.get("questions"):
-        raise RuntimeError("AI did not return valid interview questions. Try a Groq model with tool support.")
+        raise RuntimeError("Gemini did not return valid interview questions.")
     return parsed["questions"]
 
 
 def evaluate_ai_answer(row, question, answer, time_taken):
-    payload = {
-        "messages": [
-            {
-                "role": "system",
-                "content": (
-                    "You are a strict but fair interviewer. Evaluate the candidate's answer on clarity, "
-                    "relevance, and conciseness. Return structured feedback via the provided tool. "
-                    "The ideal_answer field must be a suitable model answer that teaches the topic "
-                    "clearly enough for a student who does not already know it."
-                ),
-            },
-            {
-                "role": "user",
-                "content": (
-                    f"Topic: {row['topic']}\nDifficulty: {row['difficulty']}\nType: {row['question_type']}\n\n"
-                    f"Question: {question}\n\nCandidate's answer:\n\"\"\"{answer or '(no answer provided)'}\"\"\"\n\n"
-                    f"Time taken: {time_taken}s of {row['seconds_per_question']}s allowed."
-                ),
-            },
-        ],
-        "tools": [
-            {
-                "type": "function",
-                "function": {
-                    "name": "return_feedback",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "score": {"type": "number"},
-                            "clarity": {"type": "number"},
-                            "relevance": {"type": "number"},
-                            "conciseness": {"type": "number"},
-                            "clarity_note": {"type": "string"},
-                            "relevance_note": {"type": "string"},
-                            "conciseness_note": {"type": "string"},
-                            "strengths": {"type": "string"},
-                            "improvements": {"type": "string"},
-                            "ideal_answer": {"type": "string"},
-                        },
-                        "required": [
-                            "score",
-                            "clarity",
-                            "relevance",
-                            "conciseness",
-                            "clarity_note",
-                            "relevance_note",
-                            "conciseness_note",
-                            "strengths",
-                            "improvements",
-                            "ideal_answer",
-                        ],
-                        "additionalProperties": False,
-                    },
-                },
-            }
-        ],
-        "tool_choice": {"type": "function", "function": {"name": "return_feedback"}},
+    system = (
+        "You are a strict but fair interviewer. Evaluate the candidate's answer on clarity, "
+        "relevance, and conciseness. Return structured feedback as JSON. "
+        "The ideal_answer field must be a suitable model answer that teaches the topic "
+        "clearly enough for a student who does not already know it."
+    )
+    user_prompt = (
+        f"Topic: {row['topic']}\nDifficulty: {row['difficulty']}\nType: {row['question_type']}\n\n"
+        f"Question: {question}\n\nCandidate's answer:\n\"\"\"{answer or '(no answer provided)'}\"\"\"\n\n"
+        f"Time taken: {time_taken}s of {row['seconds_per_question']}s allowed."
+    )
+    contents = [{"role": "user", "parts": [{"text": user_prompt}]}]
+    schema = {
+        "type": "object",
+        "properties": {
+            "score":            {"type": "number"},
+            "clarity":          {"type": "number"},
+            "relevance":        {"type": "number"},
+            "conciseness":      {"type": "number"},
+            "clarity_note":     {"type": "string"},
+            "relevance_note":   {"type": "string"},
+            "conciseness_note": {"type": "string"},
+            "strengths":        {"type": "string"},
+            "improvements":     {"type": "string"},
+            "ideal_answer":     {"type": "string"},
+        },
+        "required": [
+            "score", "clarity", "relevance", "conciseness",
+            "clarity_note", "relevance_note", "conciseness_note",
+            "strengths", "improvements", "ideal_answer"
+        ]
     }
-    payload = call_ai(payload)
-    parsed = parse_tool_args(payload)
+    raw = call_ai(contents, system, schema)
+    parsed = parse_gemini_response(raw)
     if not parsed:
-        raise RuntimeError("AI did not return valid feedback. Try a Groq model with tool support.")
+        raise RuntimeError("Gemini did not return valid feedback.")
     return parsed
 
 
