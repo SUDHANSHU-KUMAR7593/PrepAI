@@ -19,11 +19,9 @@ const state = {
 };
 
 const $ = (id) => document.getElementById(id);
-
 function show(id) {
   ["setup-view", "interview-view", "summary-view"].forEach((view) => $(view).classList.toggle("hidden", view !== id));
 }
-
 function toast(message) {
   const node = document.createElement("div");
   node.className = "flash success runtime";
@@ -31,7 +29,6 @@ function toast(message) {
   document.body.appendChild(node);
   setTimeout(() => node.remove(), 2600);
 }
-
 function api(path, body) {
   return fetch(path, {
     method: "POST",
@@ -240,7 +237,6 @@ $("start-form")?.addEventListener("submit", async (event) => {
     event.submitter.disabled = false;
   }
 });
-
 $("submit-answer")?.addEventListener("click", () => submitAnswer(false));
 $("skip-answer")?.addEventListener("click", () => submitAnswer(false));
 $("next-question")?.addEventListener("click", () => {
