@@ -27,7 +27,11 @@ function toast(message) {
   node.className = "flash success runtime";
   node.textContent = message;
   document.body.appendChild(node);
-  setTimeout(() => node.remove(), 2600);
+  setTimeout(() => {
+    node.style.transition = 'opacity 0.5s ease';
+    node.style.opacity = '0';
+    setTimeout(() => node.remove(), 500);
+  }, 7000);
 }
 function api(path, body) {
   return fetch(path, {
