@@ -253,6 +253,16 @@ button, input, select, textarea { font: inherit; outline: none; }
 .switch-auth a { color: var(--primary); font-weight: 700; text-decoration: underline; text-decoration-color: transparent; transition: text-decoration-color 0.2s; }
 .switch-auth a:hover { text-decoration-color: var(--primary); }
 
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 14px;
+  transition: color 0.2s;
+}
+.back-link:hover { color: var(--text); }
+
 /* Inputs */
 input, select, textarea {
   width: 100%;

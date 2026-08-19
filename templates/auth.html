@@ -15,6 +15,9 @@
     <small>© {{ year }} PrepAI</small>
   </aside>
   <main class="auth-form-wrap">
+    <div style="width: min(100%, 420px); margin-bottom: 24px;">
+      <a href="{{ url_for('index') }}" class="back-link">← Back to home</a>
+    </div>
     <form class="auth-form" method="post">
       <input type="hidden" name="mode" value="{{ mode }}">
       <h1>{{ "Create your account" if mode == "signup" else "Welcome back" }}</h1>
