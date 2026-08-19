@@ -75,11 +75,14 @@ button, input, select, textarea { font: inherit; outline: none; }
 .button {
   border: 0;
   border-radius: 12px;
-  background: var(--primary);
+  background: var(--accent-gradient);
+  background-size: 200% 200%;
+  animation: gradientMove 6s ease infinite;
   color: #fff;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  text-align: center;
   gap: 8px;
   min-height: 44px;
   padding: 0 20px;
@@ -89,26 +92,24 @@ button, input, select, textarea { font: inherit; outline: none; }
   box-shadow: var(--shadow-sm);
 }
 .button:hover { 
-  background: var(--primary-strong); 
   transform: translateY(-2px);
   box-shadow: var(--shadow-glow);
 }
 .button:active { transform: translateY(1px); }
 
 .button.outline, .button.ghost {
-  background: rgba(255, 255, 255, 0.5);
-  color: var(--text);
-  border: 1px solid var(--line-solid);
-  backdrop-filter: var(--blur);
+  background: var(--accent-gradient);
+  background-size: 200% 200%;
+  animation: gradientMove 6s ease infinite;
+  color: #fff;
+  border: 0;
 }
 .button.outline:hover, .button.ghost:hover {
-  background: rgba(255, 255, 255, 0.9);
-  border-color: var(--primary);
-  color: var(--primary-strong);
-  box-shadow: var(--shadow-sm);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow);
 }
-.button.ghost { border-color: transparent; background: transparent; }
-.button.ghost:hover { background: rgba(0,0,0,0.04); border-color: transparent; color: var(--text); box-shadow: none; }
+.button.ghost { border-color: transparent; }
+.button.ghost:hover { box-shadow: var(--shadow-glow); }
 .button.full { width: 100%; }
 .button.large { min-height: 52px; padding: 0 28px; font-size: 16px; font-weight: 700; border-radius: 14px; }
 

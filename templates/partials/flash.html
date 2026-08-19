@@ -1,9 +1,19 @@
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
-    <div class="flash-stack">
+    <div class="flash-stack" id="flash-stack">
       {% for category, message in messages %}
         <div class="flash {{ category }}">{{ message }}</div>
       {% endfor %}
     </div>
+    <script>
+      setTimeout(() => {
+        const stack = document.getElementById('flash-stack');
+        if (stack) {
+          stack.style.transition = 'opacity 0.5s ease';
+          stack.style.opacity = '0';
+          setTimeout(() => stack.remove(), 500);
+        }
+      }, 7000);
+    </script>
   {% endif %}
 {% endwith %}
