@@ -32,6 +32,7 @@ MYSQL_USER = os.getenv("MYSQL_USER", "root")
 MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD", "")
 MYSQL_DATABASE = os.getenv("MYSQL_DATABASE", "prepai")
 MYSQL_SSL_CA = os.getenv("MYSQL_SSL_CA")
+DB_INITIALIZED = False
 
 QUESTION_TYPES = {"technical", "behavioral", "hr", "system-design"}
 DIFFICULTIES = {"easy", "medium", "hard"}
@@ -113,10 +114,6 @@ def mysql_config():
     return config
 
 
-def get_db():
-    return MySQLDatabase()
-
-
 def ensure_index(db, table, index, columns):
     existing = db.execute(
         """
@@ -133,6 +130,10 @@ def ensure_index(db, table, index, columns):
 
 
 def init_db():
+    global DB_INITIALIZED
+    if DB_INITIALIZED:
+        return
+
     with get_db() as db:
         db.executescript(
             """
@@ -188,13 +189,23 @@ def init_db():
             "mock_interviews_user_created_idx",
             "user_id, created_at DESC",
         )
+    DB_INITIALIZED = True
+
+
+def get_db():
+    return MySQLDatabase()
+
+
+def get_initialized_db():
+    init_db()
+    return get_db()
 
 
 def current_user():
     user_id = session.get("user_id")
     if not user_id:
         return None
-    with get_db() as db:
+    with get_initialized_db() as db:
         return db.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
 
 
@@ -408,7 +419,7 @@ def auth():
                 flash("Passwords do not match.", "error")
                 return redirect(url_for("auth", mode="signup"))
 
-            db = get_db()
+            db = get_initialized_db()
             try:
                 # Explicit duplicate-email check before insert
                 existing = db.execute(
@@ -448,7 +459,7 @@ def auth():
                 flash("Email and password are required.", "error")
                 return redirect(url_for("auth", mode="signin"))
 
-            db = get_db()
+            db = get_initialized_db()
             try:
                 user = db.execute(
                     "SELECT * FROM users WHERE email = ?", (email,)
@@ -479,7 +490,7 @@ def logout():
 @login_required
 def dashboard():
     user = current_user()
-    with get_db() as db:
+    with get_initialized_db() as db:
         sessions = db.execute(
             """
             SELECT * FROM question_sessions
@@ -524,7 +535,7 @@ def questions():
             flash(str(exc), "error")
             return redirect(url_for("questions"))
 
-        with get_db() as db:
+        with get_initialized_db() as db:
             db.execute(
                 """
                 INSERT INTO question_sessions
@@ -579,7 +590,7 @@ def api_start_mock_interview():
     items = [{"question": q, "answer": "", "feedback": None, "score": None} for q in generated]
     interview_id = str(uuid.uuid4())
 
-    with get_db() as db:
+    with get_initialized_db() as db:
         db.execute(
             """
             INSERT INTO mock_interviews
@@ -613,7 +624,7 @@ def api_submit_answer():
     answer = str(data.get("answer", ""))[:5000]
     time_taken = clamp_int(data.get("timeTakenSeconds"), 0, 3600, 0)
 
-    with get_db() as db:
+    with get_initialized_db() as db:
         row = db.execute(
             "SELECT * FROM mock_interviews WHERE id = ? AND user_id = ?",
             (interview_id, session["user_id"]),
@@ -684,9 +695,6 @@ def api_submit_answer():
             "mode": "ai",
         }
     )
-
-
-init_db()
 
 
 if __name__ == "__main__":
