@@ -17,7 +17,7 @@ PrepAI is a Flask-based web application designed to help candidates practice for
 ## 🛠️ Tech Stack
 
 * **Backend:** Python, Flask
-* **Database:** MySQL (users, sessions, question history, and mock interview feedback)
+* **Database:** SQLite (Local storage for users, sessions, and question history)
 * **AI Integration:** Groq / OpenAI API (Chat completions for generation and evaluation)
 * **Frontend:** HTML5, CSS3, JavaScript (Vanilla JS for browser-side timing and asynchronous API handling)
 
@@ -29,7 +29,7 @@ PrepAI is a Flask-based web application designed to help candidates practice for
 2. **Generation:** The Flask backend requests contextual questions and model answers from the AI engine.
 3. **Execution:** The frontend renders questions one by one, managing the countdown timer.
 4. **Evaluation:** Upon submission, the user's answer is evaluated against a structured grading rubric via the AI API.
-5. **Persistence:** Results, scores, and feedback logs are written to MySQL and updated on the dashboard.
+5. **Persistence:** Results, scores, and feedback logs are written to the local SQLite database and updated on the dashboard.
 
 ---
 
@@ -60,7 +60,6 @@ interview-ace-main/
 ### Prerequisites
 * Python 3.8+
 * A Groq or OpenAI API key
-* MySQL 8.0+ or a hosted MySQL-compatible database
 
 ### Installation
 
@@ -80,21 +79,8 @@ pip install -r requirements.txt
 
 4.**Set up your environment variables (Create a .env file):**
 Code snippet
-SECRET_KEY=your_secret_key_here
+FLASK_SECRET_KEY=your_secret_key_here
 AI_API_KEY=your_groq_or_openai_api_key_here
-DATABASE_URL=mysql://user:password@localhost:3306/prepai
-
-Create the MySQL database before starting the app:
-
-```sql
-CREATE DATABASE prepai CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-```
-
-To copy existing local SQLite data into MySQL, configure the MySQL environment variables and run:
-
-```bash
-python migrate_sqlite_to_mysql.py
-```
 
 5.**Run the application:**
 ``bash
@@ -132,12 +118,11 @@ SECRET_KEY=<long-random-secret>
 AI_API_KEY=<your-groq-api-key>
 AI_GATEWAY_URL=https://api.groq.com/openai/v1/chat/completions
 AI_MODEL=llama-3.3-70b-versatile
-DATABASE_URL=mysql://user:password@host:3306/prepai
 ```
 
 Important Render note:
 
-The current app uses MySQL. Provision a MySQL-compatible database and set `DATABASE_URL` before deploying.
+The current app uses SQLite. On many cloud platforms, local SQLite files may reset when the service redeploys or restarts unless persistent storage is attached. For production, PostgreSQL is recommended.
 
 ## 15. Demo Script for Presentation
 
@@ -171,7 +156,7 @@ Use this flow when presenting to CEOs, judges, or interviewers.
 
 ### 15.5 Closing Statement
 
-"The MVP proves that personalized interview practice can be made faster, more accessible, and more measurable. With production upgrades like analytics, organization accounts, and role-specific roadmaps, this can become a scalable placement-preparation product."
+"The MVP proves that personalized interview practice can be made faster, more accessible, and more measurable. With production upgrades like PostgreSQL, analytics, organization accounts, and role-specific roadmaps, this can become a scalable placement-preparation product."
 
 ## 16. CEO-Level Questions and Strong Answers
 
@@ -191,13 +176,13 @@ ChatGPT is a general-purpose assistant. PrepAI is a focused workflow product. It
 
 Flask is lightweight, fast to develop with, and suitable for an MVP. It gives enough flexibility to build routes, authentication, database access, and API endpoints without unnecessary complexity.
 
-### Q5. Why MySQL?
+### Q5. Why SQLite?
 
-MySQL gives the app a proper server-backed database for production deployment while keeping the schema simple. It avoids relying on a local SQLite file that can disappear on cloud redeploys.
+SQLite is simple, file-based, and excellent for prototyping. It removes the setup burden during MVP development. For production scale, I would migrate to PostgreSQL.
 
 ### Q6. Is this production ready?
 
-It is MVP-ready, not fully enterprise production-ready. The core product flow works, but before production scaling I would add CSRF protection, rate limiting, password reset, monitoring, logging, automated tests, and stronger admin controls.
+It is MVP-ready, not fully enterprise production-ready. The core product flow works, but before production scaling I would add PostgreSQL, CSRF protection, rate limiting, password reset, monitoring, logging, automated tests, and stronger admin controls.
 
 ### Q7. How does the AI feedback work?
 
@@ -225,7 +210,7 @@ Real interviews are spoken conversations. Voice mode helps users practice verbal
 
 ### Q13. What are the main limitations?
 
-The main limitations are dependency on an external AI provider, browser-dependent voice support, no CSRF package, and no advanced analytics yet.
+The main limitations are SQLite persistence on cloud platforms, dependency on an external AI provider, browser-dependent voice support, no CSRF package, and no advanced analytics yet.
 
 ### Q14. How would you monetize this?
 
@@ -251,7 +236,7 @@ Important metrics:
 
 ### Q16. How would you scale this?
 
-I would add background jobs for heavier AI workflows, cache repeated prompts, add rate limiting, use proper observability, tune MySQL indexes, and deploy behind a production-grade WSGI server with autoscaling.
+I would move the database to PostgreSQL, add background jobs for heavier AI workflows, cache repeated prompts, add rate limiting, use proper observability, and deploy behind a production-grade WSGI server with autoscaling.
 
 ### Q17. How do you control AI cost?
 
@@ -272,7 +257,7 @@ Short-term:
 
 Medium-term:
 
-- MySQL deployment hardening.
+- PostgreSQL migration.
 - Role-specific interview tracks.
 - Resume-based question generation.
 - Company-specific preparation.
@@ -292,7 +277,7 @@ This project demonstrates full-stack development, authentication, database desig
 
 ### Q1. Explain the architecture.
 
-The app uses a Flask backend with server-rendered Jinja templates. MySQL stores users, generated question sessions, and mock interview records. The frontend uses JavaScript for the interactive mock interview timer, answer submission, feedback rendering, and voice features. The backend communicates with the AI provider through HTTP requests.
+The app uses a Flask backend with server-rendered Jinja templates. SQLite stores users, generated question sessions, and mock interview records. The frontend uses JavaScript for the interactive mock interview timer, answer submission, feedback rendering, and voice features. The backend communicates with the AI provider through HTTP requests.
 
 ### Q2. What is the purpose of `login_required`?
 

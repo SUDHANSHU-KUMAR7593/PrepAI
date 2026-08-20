@@ -1,12 +1,10 @@
 import json
 import os
+import sqlite3
 import uuid
 from datetime import datetime, timezone
 from functools import wraps
-from urllib.parse import unquote, urlparse
 
-import pymysql
-from pymysql.cursors import DictCursor
 import requests
 from dotenv import load_dotenv
 from flask import (
@@ -25,13 +23,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 load_dotenv()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATABASE_URL = os.getenv("DATABASE_URL")
-MYSQL_HOST = os.getenv("MYSQL_HOST", "localhost")
-MYSQL_PORT = int(os.getenv("MYSQL_PORT", "3306"))
-MYSQL_USER = os.getenv("MYSQL_USER", "root")
-MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD", "")
-MYSQL_DATABASE = os.getenv("MYSQL_DATABASE", "prepai")
-MYSQL_SSL_CA = os.getenv("MYSQL_SSL_CA")
+DATABASE = os.path.join(BASE_DIR, "prepai.sqlite3")
 
 QUESTION_TYPES = {"technical", "behavioral", "hr", "system-design"}
 DIFFICULTIES = {"easy", "medium", "hard"}
@@ -51,85 +43,10 @@ def now_iso():
     return datetime.now(timezone.utc).isoformat()
 
 
-class MySQLDatabase:
-    def __init__(self):
-        self.conn = pymysql.connect(**mysql_config(), cursorclass=DictCursor, autocommit=False)
-
-    def execute(self, query, params=None):
-        cursor = self.conn.cursor()
-        cursor.execute(query.replace("?", "%s"), params or ())
-        return cursor
-
-    def executescript(self, script):
-        for statement in script.split(";"):
-            statement = statement.strip()
-            if statement:
-                self.execute(statement)
-
-    def commit(self):
-        self.conn.commit()
-
-    def rollback(self):
-        self.conn.rollback()
-
-    def close(self):
-        self.conn.close()
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc, tb):
-        if exc_type:
-            self.rollback()
-        else:
-            self.commit()
-        self.close()
-
-
-def mysql_config():
-    if DATABASE_URL:
-        parsed = urlparse(DATABASE_URL)
-        database = parsed.path.lstrip("/")
-        config = {
-            "host": parsed.hostname or MYSQL_HOST,
-            "port": parsed.port or MYSQL_PORT,
-            "user": unquote(parsed.username) if parsed.username else MYSQL_USER,
-            "password": unquote(parsed.password) if parsed.password else MYSQL_PASSWORD,
-            "database": database or MYSQL_DATABASE,
-            "charset": "utf8mb4",
-        }
-    else:
-        config = {
-            "host": MYSQL_HOST,
-            "port": MYSQL_PORT,
-            "user": MYSQL_USER,
-            "password": MYSQL_PASSWORD,
-            "database": MYSQL_DATABASE,
-            "charset": "utf8mb4",
-        }
-
-    if MYSQL_SSL_CA:
-        config["ssl"] = {"ca": MYSQL_SSL_CA}
-    return config
-
-
 def get_db():
-    return MySQLDatabase()
-
-
-def ensure_index(db, table, index, columns):
-    existing = db.execute(
-        """
-        SELECT COUNT(*) AS count
-        FROM information_schema.statistics
-        WHERE table_schema = DATABASE()
-          AND table_name = ?
-          AND index_name = ?
-        """,
-        (table, index),
-    ).fetchone()
-    if existing["count"] == 0:
-        db.execute(f"CREATE INDEX {index} ON {table} ({columns})")
+    conn = sqlite3.connect(DATABASE)
+    conn.row_factory = sqlite3.Row
+    return conn
 
 
 def init_db():
@@ -137,56 +54,48 @@ def init_db():
         db.executescript(
             """
             CREATE TABLE IF NOT EXISTS users (
-              id VARCHAR(36) PRIMARY KEY,
-              email VARCHAR(255) NOT NULL UNIQUE,
-              password_hash VARCHAR(255) NOT NULL,
-              full_name VARCHAR(255) DEFAULT '',
-              target_role VARCHAR(255) DEFAULT '',
-              created_at VARCHAR(40) NOT NULL,
-              updated_at VARCHAR(40) NOT NULL
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+              id TEXT PRIMARY KEY,
+              email TEXT NOT NULL UNIQUE,
+              password_hash TEXT NOT NULL,
+              full_name TEXT DEFAULT '',
+              target_role TEXT DEFAULT '',
+              created_at TEXT NOT NULL,
+              updated_at TEXT NOT NULL
+            );
 
             CREATE TABLE IF NOT EXISTS question_sessions (
-              id VARCHAR(36) PRIMARY KEY,
-              user_id VARCHAR(36) NOT NULL,
+              id TEXT PRIMARY KEY,
+              user_id TEXT NOT NULL,
               topic TEXT NOT NULL,
-              question_type VARCHAR(50) NOT NULL,
-              difficulty VARCHAR(50) NOT NULL,
-              questions JSON NOT NULL,
-              created_at VARCHAR(40) NOT NULL,
+              question_type TEXT NOT NULL,
+              difficulty TEXT NOT NULL,
+              questions TEXT NOT NULL,
+              created_at TEXT NOT NULL,
               FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+            );
 
             CREATE TABLE IF NOT EXISTS mock_interviews (
-              id VARCHAR(36) PRIMARY KEY,
-              user_id VARCHAR(36) NOT NULL,
+              id TEXT PRIMARY KEY,
+              user_id TEXT NOT NULL,
               topic TEXT NOT NULL,
               role TEXT,
-              difficulty VARCHAR(50) NOT NULL,
-              question_type VARCHAR(50) NOT NULL,
-              seconds_per_question INT NOT NULL DEFAULT 120,
-              items JSON NOT NULL,
-              overall_score DOUBLE,
-              status VARCHAR(50) NOT NULL DEFAULT 'in_progress',
-              completed_at VARCHAR(40),
-              created_at VARCHAR(40) NOT NULL,
-              updated_at VARCHAR(40) NOT NULL,
+              difficulty TEXT NOT NULL,
+              question_type TEXT NOT NULL,
+              seconds_per_question INTEGER NOT NULL DEFAULT 120,
+              items TEXT NOT NULL,
+              overall_score REAL,
+              status TEXT NOT NULL DEFAULT 'in_progress',
+              completed_at TEXT,
+              created_at TEXT NOT NULL,
+              updated_at TEXT NOT NULL,
               FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+            );
 
+            CREATE INDEX IF NOT EXISTS question_sessions_user_created_idx
+              ON question_sessions (user_id, created_at DESC);
+            CREATE INDEX IF NOT EXISTS mock_interviews_user_created_idx
+              ON mock_interviews (user_id, created_at DESC);
             """
-        )
-        ensure_index(
-            db,
-            "question_sessions",
-            "question_sessions_user_created_idx",
-            "user_id, created_at DESC",
-        )
-        ensure_index(
-            db,
-            "mock_interviews",
-            "mock_interviews_user_created_idx",
-            "user_id, created_at DESC",
         )
 
 
@@ -396,74 +305,32 @@ def auth():
         password = request.form.get("password", "")
         full_name = request.form.get("full_name", "").strip()
 
-        if mode == "signup":
-            confirm_password = request.form.get("confirm_password", "")
-            if not email:
-                flash("Email is required.", "error")
-                return redirect(url_for("auth", mode="signup"))
-            if len(password) < 6:
-                flash("Password must be at least 6 characters.", "error")
-                return redirect(url_for("auth", mode="signup"))
-            if password != confirm_password:
-                flash("Passwords do not match.", "error")
-                return redirect(url_for("auth", mode="signup"))
-
-            db = get_db()
-            try:
-                # Explicit duplicate-email check before insert
-                existing = db.execute(
-                    "SELECT id FROM users WHERE email = ?", (email,)
-                ).fetchone()
-                if existing:
-                    flash("An account already exists for that email. Please sign in instead.", "error")
-                    db.close()
+        with get_db() as db:
+            if mode == "signup":
+                if len(password) < 6:
+                    flash("Password must be at least 6 characters.", "error")
                     return redirect(url_for("auth", mode="signup"))
-
-                user_id = str(uuid.uuid4())
-                ts = now_iso()
-                db.execute(
-                    """
-                    INSERT INTO users (id, email, password_hash, full_name, created_at, updated_at)
-                    VALUES (?, ?, ?, ?, ?, ?)
-                    """,
-                    (user_id, email, generate_password_hash(password), full_name, ts, ts),
-                )
-                db.commit()  # Explicitly commit so data is on disk before session is set
-                session["user_id"] = user_id
-                flash("Account created. Welcome!", "success")
-                db.close()
-                return redirect(url_for("dashboard"))
-            except pymysql.err.IntegrityError:
-                db.rollback()
-                db.close()
-                flash("An account already exists for that email.", "error")
-                return redirect(url_for("auth", mode="signup"))
-            except Exception:
-                db.rollback()
-                db.close()
-                flash("Something went wrong. Please try again.", "error")
-                return redirect(url_for("auth", mode="signup"))
-        else:
-            if not email or not password:
-                flash("Email and password are required.", "error")
-                return redirect(url_for("auth", mode="signin"))
-
-            db = get_db()
-            try:
-                user = db.execute(
-                    "SELECT * FROM users WHERE email = ?", (email,)
-                ).fetchone()
-                if user and check_password_hash(user["password_hash"], password):
-                    session.clear()  # Clear any stale session before setting new one
-                    session["user_id"] = user["id"]
-                    db.close()
-                    flash("Signed in successfully.", "success")
+                try:
+                    user_id = str(uuid.uuid4())
+                    db.execute(
+                        """
+                        INSERT INTO users (id, email, password_hash, full_name, created_at, updated_at)
+                        VALUES (?, ?, ?, ?, ?, ?)
+                        """,
+                        (user_id, email, generate_password_hash(password), full_name, now_iso(), now_iso()),
+                    )
+                    session["user_id"] = user_id
+                    flash("Account created. Welcome!", "success")
                     return redirect(url_for("dashboard"))
-                db.close()
+                except sqlite3.IntegrityError:
+                    flash("An account already exists for that email.", "error")
+            else:
+                user = db.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
+                if user and check_password_hash(user["password_hash"], password):
+                    session["user_id"] = user["id"]
+                    flash("Signed in.", "success")
+                    return redirect(url_for("dashboard"))
                 flash("Invalid email or password.", "error")
-            except Exception:
-                db.close()
-                flash("Something went wrong. Please try again.", "error")
 
     return render_template("auth.html", mode=mode)
 
