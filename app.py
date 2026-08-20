@@ -205,8 +205,13 @@ def current_user():
     user_id = session.get("user_id")
     if not user_id:
         return None
-    with get_initialized_db() as db:
-        return db.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
+    try:
+        with get_initialized_db() as db:
+            return db.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
+    except pymysql.err.MySQLError as exc:
+        app.logger.warning("Could not load current user from MySQL: %s", exc)
+        session.pop("user_id", None)
+        return None
 
 
 @app.context_processor
@@ -490,6 +495,9 @@ def logout():
 @login_required
 def dashboard():
     user = current_user()
+    if not user:
+        flash("Please sign in again.", "error")
+        return redirect(url_for("auth", mode="signin"))
     with get_initialized_db() as db:
         sessions = db.execute(
             """
