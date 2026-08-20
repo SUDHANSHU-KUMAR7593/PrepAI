@@ -24,15 +24,20 @@
       <p>{{ "Start preparing in seconds." if mode == "signup" else "Sign in to continue your prep." }}</p>
       {% if mode == "signup" %}
         <label>Full name
-          <input name="full_name" required>
+          <input name="full_name" required autocomplete="name">
         </label>
       {% endif %}
       <label>Email
-        <input type="email" name="email" required>
+        <input type="email" name="email" required autocomplete="email">
       </label>
       <label>Password
-        <input type="password" name="password" minlength="6" required>
+        <input type="password" name="password" minlength="6" required autocomplete="{{ 'new-password' if mode == 'signup' else 'current-password' }}">
       </label>
+      {% if mode == "signup" %}
+        <label>Confirm password
+          <input type="password" name="confirm_password" minlength="6" required autocomplete="new-password">
+        </label>
+      {% endif %}
       <button class="button full" type="submit">{{ "Create account" if mode == "signup" else "Sign in" }}</button>
       <p class="switch-auth">
         {% if mode == "signup" %}
