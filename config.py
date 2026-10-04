@@ -11,7 +11,7 @@ load_dotenv()
 class Config:
     """Base configuration shared by all environments."""
 
-    SECRET_KEY = os.getenv("FLASK_SECRET_KEY", "dev-secret-change-me")
+    SECRET_KEY = os.getenv("FLASK_SECRET_KEY") or os.getenv("SECRET_KEY", "dev-secret-change-me")
 
     # ── Database ──────────────────────────────────────────────────────────
     # Require explicit DATABASE_URL; never fall back to SQLite silently.
