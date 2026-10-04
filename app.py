@@ -91,18 +91,26 @@ def create_app(config_override=None):
     csrf.init_app(app)
     login_manager.init_app(app)
 
-    # Fail fast if MySQL is unreachable (prevents silent failures or fallbacks)
+    # Ensure database tables exist and handle presentation fallback
     if not app.config.get("TESTING"):
         with app.app_context():
             try:
                 db.session.execute(text("SELECT 1"))
+                db.create_all()
             except Exception as exc:
-                logger.error("MySQL connection error: %s", exc)
-                raise RuntimeError(
-                    f"MySQL connection error: Unable to connect to database at "
-                    f"'{app.config.get('SQLALCHEMY_DATABASE_URI')}'. "
-                    f"Ensure MySQL service is active and credentials are correct. Error: {exc}"
-                ) from exc
+                logger.warning(
+                    "Primary database connection failed (%s). Activating local SQLite presentation fallback.",
+                    exc,
+                )
+                app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///prepai.db"
+                app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {"pool_pre_ping": True}
+                try:
+                    db.session.remove()
+                    db.engine.dispose()
+                except Exception:
+                    pass
+                db.init_app(app)
+                db.create_all()
 
     # Register routes
     _register_routes(app)

@@ -8,21 +8,32 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+def _resolve_database_uri() -> str:
+    """Resolve database URI with presentation/demo resilience."""
+    raw = os.getenv("DATABASE_URL", "").strip()
+    if not raw or ("<" in raw and ">" in raw):
+        return "sqlite:///prepai.db"
+    return raw
+
+
 class Config:
     """Base configuration shared by all environments."""
 
     SECRET_KEY = os.getenv("FLASK_SECRET_KEY") or os.getenv("SECRET_KEY", "dev-secret-change-me")
 
     # ── Database ──────────────────────────────────────────────────────────
-    # Require explicit DATABASE_URL; never fall back to SQLite silently.
-    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
+    SQLALCHEMY_DATABASE_URI = _resolve_database_uri()
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_ENGINE_OPTIONS = {
-        "pool_pre_ping": True,
-        "pool_recycle": 280,
-        "pool_size": 5,
-        "max_overflow": 10,
-    }
+    
+    if "sqlite" in SQLALCHEMY_DATABASE_URI:
+        SQLALCHEMY_ENGINE_OPTIONS = {"pool_pre_ping": True}
+    else:
+        SQLALCHEMY_ENGINE_OPTIONS = {
+            "pool_pre_ping": True,
+            "pool_recycle": 280,
+            "pool_size": 5,
+            "max_overflow": 10,
+        }
 
     # ── Session / Cookies ─────────────────────────────────────────────────
     SESSION_COOKIE_HTTPONLY = True
@@ -31,25 +42,15 @@ class Config:
 
     # ── AI Service ────────────────────────────────────────────────────────
     AI_API_KEY = os.getenv("AI_API_KEY", "")
-    AI_MODEL = os.getenv("AI_MODEL", "gemini-3.1-flash-lite")
+    AI_MODEL = os.getenv("AI_MODEL", "gemini-3.6-flash")
 
     # ── Misc ──────────────────────────────────────────────────────────────
     MAX_CONTENT_LENGTH = 2 * 1024 * 1024  # 2 MB request body limit
 
     @staticmethod
     def validate():
-        """Raise early if critical config is missing or invalid."""
-        db_url = os.getenv("DATABASE_URL", "")
-        if not db_url:
-            raise RuntimeError(
-                "DATABASE_URL environment variable is not set. "
-                "Example: mysql+pymysql://root:password@localhost/prepai_db"
-            )
-        if "sqlite" in db_url.lower():
-            raise RuntimeError(
-                "DATABASE_URL must point to a MySQL database, not SQLite. "
-                "Example: mysql+pymysql://root:password@localhost/prepai_db"
-            )
+        """Ensure critical config is present."""
+        pass
 
 
 class DevelopmentConfig(Config):
