@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% set shell = true %}
+{% set title = "Practice - " + session.topic + " - PrepAI" %}
+
+{% block content %}
+<section class="page narrow" id="practice-app"
+  data-session-id="{{ session.id }}"
+  data-questions='{{ questions_json }}'
+  data-qtype="{{ session.question_type }}"
+  data-csrf="{{ csrf_token() }}">
+
+  {# Setup view #}
+  <div id="practice-setup">
+    <header class="page-header">
+      <div>
+        <a href="{{ url_for('session_detail', session_id=session.id) }}" class="back-link">← Back to session</a>
+        <h1>Practice: {{ session.topic }}</h1>
+        <p>
+          <span class="badge badge-type">{{ session.question_type|replace('-', ' ')|title }}</span>
+          <span class="badge badge-diff-{{ session.difficulty }}">{{ session.difficulty|title }}</span>
+          <span class="meta-text">{{ questions|length }} questions</span>
+        </p>
+      </div>
+    </header>
+    <div class="panel practice-start-card">
+      <h2>Ready to practice?</h2>
+      <p>Go through each question one at a time. Submit your answer to see the model response.</p>
+      <button class="button large" id="start-practice" type="button">Start practice</button>
+    </div>
+  </div>
+
+  {# Question view #}
+  <div id="practice-question" class="hidden">
+    <header class="page-header">
+      <div>
+        <div class="eyebrow" id="pq-counter">Question 1 of {{ questions|length }}</div>
+        <h1 id="pq-text"></h1>
+      </div>
+    </header>
+    <div class="progress"><span id="pq-progress" style="width:0%"></span></div>
+
+    {# MCQ options #}
+    <div id="pq-mcq-options" class="mcq-practice hidden"></div>
+
+    {# Coding details #}
+    <div id="pq-coding-details" class="hidden panel">
+      <div id="pq-constraints"></div>
+      <div id="pq-example"></div>
+    </div>
+
+    {# Text answer #}
+    <div id="pq-answer-wrap">
+      <textarea id="pq-answer" rows="6" placeholder="Type your answer..."></textarea>
+    </div>
+
+    <div class="actions" id="pq-actions">
+      <button class="button" id="pq-submit" type="button">Submit answer</button>
+      <button class="button ghost" id="pq-skip" type="button">Skip</button>
+    </div>
+
+    {# Feedback #}
+    <div id="pq-feedback" class="panel feedback hidden">
+      <div id="pq-fb-result"></div>
+      <div id="pq-fb-answer"></div>
+      <button class="button" id="pq-next" type="button">Next question</button>
+    </div>
+  </div>
+
+  {# Summary view #}
+  <div id="practice-summary" class="hidden">
+    <header class="page-header">
+      <div>
+        <h1>Practice complete!</h1>
+        <p>Here's how you did.</p>
+      </div>
+      <div class="actions">
+        <button class="button outline" id="practice-restart" type="button">Restart</button>
+        <a class="button" href="{{ url_for('session_detail', session_id=session.id) }}">Back to session</a>
+      </div>
+    </header>
+    <div class="score-card" id="ps-score-card">
+      <span>Your score</span>
+      <strong id="ps-score">0 / 0</strong>
+    </div>
+    <div id="ps-review" class="history"></div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='practice.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% set shell = true %}
+{% set title = "Profile - PrepAI" %}
+
+{% block content %}
+<section class="page narrow">
+  <header class="page-header">
+    <div>
+      <h1>Profile</h1>
+      <p>Manage your account settings.</p>
+    </div>
+  </header>
+
+  <form class="panel form-grid" method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label class="span-all" for="email">Email
+      <input id="email" type="email" value="{{ current_user.email }}" disabled>
+      <small style="color: var(--muted);">Email cannot be changed.</small>
+    </label>
+    <label for="full_name">Full name
+      <input id="full_name" name="full_name" value="{{ current_user.full_name or '' }}" placeholder="Your name">
+    </label>
+    <label for="target_role">Target role
+      <input id="target_role" name="target_role" value="{{ current_user.target_role or '' }}" placeholder="e.g. Software Engineer, Data Scientist">
+    </label>
+    <button class="button" type="submit">Save changes</button>
+  </form>
+
+  <div class="panel" style="margin-top: 24px;">
+    <h3>Account info</h3>
+    <p class="meta-text">Member since {{ current_user.created_at.strftime('%B %d, %Y') if current_user.created_at else 'N/A' }}</p>
+  </div>
+</section>
+{% endblock %}

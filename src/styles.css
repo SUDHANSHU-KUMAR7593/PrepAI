@@ -1,0 +1,63 @@
+// src/styles.css
+/* Copy of the current static stylesheet */
+:root {
+  /* Colors */
+  --bg: #f3f6f9; /* Subtle cool grey */
+  --bg-gradient: linear-gradient(135deg, #f0f4ff 0%, #ffffff 100%);
+  --card: rgba(255, 255, 255, 0.7);
+  --card-solid: #ffffff;
+  --text: #0f172a;
+  --muted: #64748b;
+  --line: rgba(226, 232, 240, 0.6);
+  --line-solid: #e2e8f0;
+  --primary: #4f46e5;
+  --primary-strong: #4338ca;
+  --primary-glow: rgba(79, 70, 229, 0.4);
+  --accent: #e0e7ff;
+  --accent-gradient: linear-gradient(135deg, #4f46e5, #0ea5e9);
+  --danger: #e11d48;
+  --success: #10b981;
+  /* Shadows \u0026 Depth */
+  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  --shadow: 0 12px 30px -4px rgba(15, 23, 42, 0.06);
+  --shadow-lg: 0 24px 50px -12px rgba(15, 23, 42, 0.1);
+  --shadow-glow: 0 0 20px var(--primary-glow);
+  /* Blur for Glassmorphism */
+  --blur: blur(24px);
+  --blur-heavy: blur(40px);
+  /* Premium design tokens added earlier */
+  --color-primary-h: 210;
+  --color-primary-s: 60%;
+  --color-primary-l: 55%;
+  --color-primary: hsl(var(--color-primary-h), var(--color-primary-s), var(--color-primary-l));
+  --color-bg: #f5f7fa;
+  --color-bg-dark: #1e1e2f;
+  --color-text: #212121;
+  --color-text-dark: #e0e0e0;
+  --radius: 0.5rem;
+  --transition: 0.2s ease-out;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: var(--color-bg-dark);
+    --color-text: var(--color-text-dark);
+  }
+}
+
+/* Global styles */
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: 'Inter', system-ui, sans-serif;
+  line-height: 1.5;
+  margin: 0;
+  padding: 0;
+}
+
+button, input, textarea {
+  border-radius: var(--radius);
+  transition: var(--transition);
+}
+
+/* Existing CSS follows – (you can keep the rest of the original stylesheet below) */

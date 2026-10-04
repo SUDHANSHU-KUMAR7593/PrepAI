@@ -3,7 +3,7 @@
 {% set title = ("Voice Mock Interview - PrepAI" if voice else "Mock Interview - PrepAI") %}
 
 {% block content %}
-<section class="page narrow" id="interview-app" data-voice="{{ 'true' if voice else 'false' }}">
+<section class="page narrow" id="interview-app" data-voice="{{ 'true' if voice else 'false' }}" data-csrf="{{ csrf_token() }}">
   <div id="setup-view">
     <header class="page-header">
       <div>

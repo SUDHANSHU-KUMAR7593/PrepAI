@@ -20,6 +20,7 @@ dist-ssr
 *.sqlite3
 __pycache__/
 *.py[cod]
+.pytest_cache/
 
 # Wrangler / Cloudflare
 .wrangler/

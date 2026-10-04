@@ -10,7 +10,7 @@
     </a>
     <div>
       <h2>Practice smarter. Get hired faster.</h2>
-      <p>Your personal AI interview coach, rebuilt as a Python project.</p>
+      <p>Your personal AI interview coach — generate questions, practice timed interviews, track your progress.</p>
     </div>
     <small>© {{ year }} PrepAI</small>
   </aside>
@@ -19,19 +19,20 @@
       <a href="{{ url_for('index') }}" class="back-link">← Back to home</a>
     </div>
     <form class="auth-form" method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <input type="hidden" name="mode" value="{{ mode }}">
       <h1>{{ "Create your account" if mode == "signup" else "Welcome back" }}</h1>
       <p>{{ "Start preparing in seconds." if mode == "signup" else "Sign in to continue your prep." }}</p>
       {% if mode == "signup" %}
-        <label>Full name
-          <input name="full_name" required>
+        <label for="full_name">Full name
+          <input id="full_name" name="full_name" placeholder="Your full name" required>
         </label>
       {% endif %}
-      <label>Email
-        <input type="email" name="email" required>
+      <label for="email">Email
+        <input id="email" type="email" name="email" placeholder="you@example.com" required>
       </label>
-      <label>Password
-        <input type="password" name="password" minlength="6" required>
+      <label for="password">Password
+        <input id="password" type="password" name="password" minlength="6" placeholder="At least 6 characters" required>
       </label>
       <button class="button full" type="submit">{{ "Create account" if mode == "signup" else "Sign in" }}</button>
       <p class="switch-auth">

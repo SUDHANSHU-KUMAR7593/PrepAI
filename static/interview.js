@@ -1,5 +1,6 @@
 const root = document.getElementById("interview-app");
 const isVoice = root?.dataset.voice === "true";
+const csrfToken = root?.dataset.csrf || "";
 
 const state = {
   phase: "setup",
@@ -36,7 +37,7 @@ function toast(message) {
 function api(path, body) {
   return fetch(path, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken },
     body: JSON.stringify(body),
   }).then(async (response) => {
     const payload = await response.json().catch(() => ({}));

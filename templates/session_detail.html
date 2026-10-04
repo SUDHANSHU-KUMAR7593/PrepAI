@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% set shell = true %}
+{% set title = session.topic + " - PrepAI" %}
+
+{% block content %}
+<section class="page narrow">
+  <header class="page-header">
+    <div>
+      <a href="{{ url_for('library') }}" class="back-link">← Back to library</a>
+      <h1>{{ session.topic }}</h1>
+      <p>
+        <span class="badge badge-type">{{ session.question_type|replace('-', ' ')|title }}</span>
+        <span class="badge badge-diff-{{ session.difficulty }}">{{ session.difficulty|title }}</span>
+        <span class="meta-text">{{ questions|length }} questions · Generated {{ session.created_at.strftime('%B %d, %Y') if session.created_at else '' }}</span>
+      </p>
+    </div>
+    <div class="actions">
+      <a class="button" href="{{ url_for('practice', session_id=session.id) }}">Practice these</a>
+    </div>
+  </header>
+
+  <div class="accordion panel">
+    {% for q in questions %}
+      <details>
+        <summary>
+          <span>{{ loop.index }}.</span>
+          {{ (q.question if q is mapping else q)[:200] }}
+          <button class="bookmark-btn {{ 'active' if loop.index0 in bookmarked_indices else '' }}"
+                  onclick="event.stopPropagation(); toggleBookmark('{{ session.id }}', {{ loop.index0 }}, this)"
+                  title="Bookmark this question">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="{{ 'currentColor' if loop.index0 in bookmarked_indices else 'none' }}" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+          </button>
+        </summary>
+        {% if q is mapping %}
+          {% if q.options is defined %}
+            {# MCQ #}
+            <div class="mcq-options">
+              {% for key in ['A', 'B', 'C', 'D'] %}
+                {% if key in q.options %}
+                <div class="mcq-option {{ 'correct' if key == q.get('correct_answer', '') else '' }}">
+                  <strong>{{ key }}.</strong> {{ q.options[key] }}
+                  {% if key == q.get('correct_answer', '') %}<span class="correct-mark">✓ Correct</span>{% endif %}
+                </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+            {% if q.explanation %}<div class="explanation-block"><strong>Explanation:</strong><p>{{ q.explanation }}</p></div>{% endif %}
+          {% elif q.solution is defined %}
+            {# Coding #}
+            <div class="coding-q">
+              {% if q.constraints %}<h4>Constraints</h4><p>{{ q.constraints }}</p>{% endif %}
+              {% if q.example %}<h4>Example</h4><pre>{{ q.example }}</pre>{% endif %}
+              {% if q.hint %}<details class="hint-block"><summary>💡 Hint</summary><p>{{ q.hint }}</p></details>{% endif %}
+              {% if q.solution %}<details class="solution-block"><summary>📝 Reference Solution</summary><pre>{{ q.solution }}</pre></details>{% endif %}
+            </div>
+          {% else %}
+            {# Standard Q&A #}
+            <p>{{ q.answer }}</p>
+            {% if q.explanation %}<div class="explanation-block"><strong>Why this is a strong answer:</strong><p>{{ q.explanation }}</p></div>{% endif %}
+          {% endif %}
+        {% else %}
+          <p>{{ q }}</p>
+        {% endif %}
+      </details>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleBookmark(sessionId, questionIndex, btn) {
+  fetch('/api/bookmark/toggle', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token() }}' },
+    body: JSON.stringify({ sessionId, questionIndex })
+  })
+  .then(r => r.json())
+  .then(data => {
+    btn.classList.toggle('active', data.bookmarked);
+    const svg = btn.querySelector('svg');
+    svg.setAttribute('fill', data.bookmarked ? 'currentColor' : 'none');
+  });
+}
+</script>
+{% endblock %}

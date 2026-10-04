@@ -1,109 +1,143 @@
 # PrepAI - AI Powered Interview Preparation Platform
 
-PrepAI is a Flask-based web application designed to help candidates practice for technical, behavioral, HR, and system-design interviews. Using AI, the platform generates realistic interview questions, conducts timed mock interviews, provides rubric-based feedback, and tracks user progress locally.
+PrepAI is an advanced, production-grade interview preparation platform built with Python, Flask, MySQL, and Google Gemini AI. It empowers candidates to practice technical, behavioral, HR, system-design, MCQ, and coding questions under realistic conditions with instant AI grading, rubrics, spoken voice mode, question library, bookmarks, interactive practice mode, and detailed dashboard analytics.
 
 ---
 
 ## 🚀 Features
 
-* **AI Question Generator:** Dynamically creates customized interview questions based on topic, role, question type, and difficulty level.
-* **Timed Mock Interviews:** Simulates real interview pressure with a built-in timer for user submissions.
-* **Instant Evaluation:** Reviews written answers using AI to deliver performance scores, highlighting strengths, specific areas for improvement, and a suggested model answer.
-* **User Dashboard:** Tracks metrics including total questions practiced, distinct topics covered, and recent session history.
-* **Secure Authentication:** Built-in user sign-up and login capabilities with securely hashed passwords.
+* **Multi-Mode AI Question Generator:** Dynamically creates tailored questions (Technical, Behavioral, System Design, MCQ with 4 choices and explanations, and Coding challenges with test specifications) using Google Gemini AI.
+* **Timed Mock Interviews & Voice Mode:** Simulates authentic interview pressure with configurable timers, browser Speech-to-Text voice transcription, and Text-to-Speech audio question reading.
+* **Rubric-Based AI Evaluation:** Grades answers across Clarity, Relevance, and Conciseness with qualitative notes, actionable strengths and improvements, and an ideal model answer.
+* **Interactive Practice Mode:** Immediate flashcard-style practice on generated questions with instant checking, explanation reveals, and accuracy tracking.
+* **Question Library & Bookmarks:** Filter and search previously generated sessions by topic, question type, and difficulty; bookmark high-value questions for targeted revision.
+* **User Dashboard & Analytics:** Tracks total sessions, questions practiced, accuracy rate, weak topic identification, and score progression.
+* **Enterprise Security:** Flask-Login session management, Werkzeug secure password hashing, Flask-WTF CSRF protection on forms and asynchronous JSON endpoints, and input sanitization.
+* **Robust MySQL Architecture:** SQLAlchemy 2.x ORM models, PyMySQL connector, connection pooling, and automated migration scripts.
+* **Comprehensive Test Suite:** 26 automated unit and integration tests across models, auth, question generator, mock interviews, and migration.
 
 ---
 
 ## 🛠️ Tech Stack
 
-* **Backend:** Python, Flask
-* **Database:** SQLite (Local storage for users, sessions, and question history)
-* **AI Integration:** Groq / OpenAI API (Chat completions for generation and evaluation)
-* **Frontend:** HTML5, CSS3, JavaScript (Vanilla JS for browser-side timing and asynchronous API handling)
+* **Backend:** Python 3.13, Flask 3.0, Flask-SQLAlchemy, Flask-Migrate, Flask-Login, Flask-WTF
+* **Database:** MySQL 8.x with PyMySQL connector and connection pooling
+* **AI Integration:** Google Gemini API (`gemini-2.5-flash`) via structured JSON schema enforcement
+* **Frontend:** Responsive HTML5, Vanilla CSS3 (modern glassmorphism, dynamic animations, dark mode), Vanilla JavaScript
+* **Testing:** pytest, pytest-flask
 
 ---
 
 ## 📋 System Architecture & Workflow
 
-1. **Setup:** The user authenticates and configures a practice session (selecting topic, difficulty, question count, and time limits).
-2. **Generation:** The Flask backend requests contextual questions and model answers from the AI engine.
-3. **Execution:** The frontend renders questions one by one, managing the countdown timer.
-4. **Evaluation:** Upon submission, the user's answer is evaluated against a structured grading rubric via the AI API.
-5. **Persistence:** Results, scores, and feedback logs are written to the local SQLite database and updated on the dashboard.
+```text
+User Browser <──> Flask App (Routes / CSRF / Auth) <──> SQLAlchemy ORM <──> MySQL Database
+                         │
+                         ▼
+                   Gemini AI Service (Structured Schema / Rubric Grading)
+```
+
+1. **Setup & Config:** Candidates select role, topic, question type, difficulty, and question count.
+2. **AI Generation:** Backend calls Gemini with structured schemas to generate questions, rubric rubrics, options (MCQ), or test specifications (Coding).
+3. **Execution & Voice:** Frontend runs timed sessions with speech recognition (Web Speech API) and audio playback.
+4. **Instant Evaluation:** Answers are graded across multi-dimensional rubrics with actionable feedback.
+5. **Persistence & Analytics:** Saved to MySQL database for dashboard metrics, library searches, and practice mode.
 
 ---
 
 ## 📁 Project Structure
+
 ```text
-interview-ace-main/
-├── app.py
-├── prepai.sqlite3
-├── requirements.txt
-├── Procfile
-├── render.yaml
-├── .env.example
+PrepAI/
+├── app.py                      # Application factory, routes, context, and error handlers
+├── ai_service.py               # Google Gemini AI client, structured prompt schemas & parsers
+├── config.py                   # Environment-driven configuration (Dev, Prod, Testing)
+├── extensions.py               # Flask-SQLAlchemy, Flask-Migrate, Flask-WTF CSRF, Flask-Login
+├── models.py                   # SQLAlchemy 2.x models (User, QuestionSession, MockInterview, Bookmark, PracticeAttempt)
+├── migrate_sqlite_to_mysql.py  # Safe, idempotent SQLite-to-MySQL migration script with validation
+├── inspect_db.py               # MySQL database and schema inspector utility
+├── requirements.txt            # Python dependencies
+├── Procfile & render.yaml      # Deployment configurations
+├── .env.example                # Sample environment configuration
 ├── static/
-│   ├── interview.js
-│   └── styles.css
-└── templates/
-    ├── auth.html
-    ├── base.html
-    ├── dashboard.html
-    ├── index.html
-    ├── mock_interview.html
-    ├── questions.html
-    └── partials/
-        └── flash.html
+│   ├── styles.css              # Modern glassmorphism UI styles
+│   ├── interview.js            # Mock interview timer, speech recognition & synthesis
+│   └── practice.js             # Interactive practice mode and MCQ scoring
+├── templates/                  # Jinja2 templates (dashboard, questions, library, practice, bookmarks, profile)
+└── tests/                      # Pytest automated test suite (26 passing tests)
+    ├── conftest.py             # Fixtures and test database setup
+    ├── test_models.py          # Model CRUD, cascade delete, and constraints
+    ├── test_auth.py            # Authentication, registration, and route security
+    ├── test_questions.py       # AI generation, library, bookmarks, and practice mode
+    ├── test_interview.py       # Mock and voice interview lifecycle and evaluation
+    └── test_migration.py       # SQLite-to-MySQL data migration validation
 ```
+
+---
+
 ## 🔧 Getting Started
 
 ### Prerequisites
-* Python 3.8+
-* A Groq or OpenAI API key
+* Python 3.10+
+* MySQL Server (8.0+)
+* Google Gemini API Key
 
 ### Installation
 
 1. **Clone the repository:**
 ```bash
-git clone [https://github.com/SUDHANSHU-KUMAR7593/PrepAI.git](https://github.com/SUDHANSHU-KUMAR7593/PrepAI.git)
+git clone https://github.com/SUDHANSHU-KUMAR7593/PrepAI.git
 cd PrepAI
+```
 
-2.**Create and activate a virtual environment:**
+2. **Set up virtual environment:**
 ```bash
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+# Windows:
+venv\Scripts\activate
+# Linux/macOS:
+source venv/bin/activate
+```
 
-3.**Install the required dependencies:**
-```bash
-pip install -r requirements.txt
-
-4.**Set up your environment variables (Create a .env file):**
-Code snippet
-FLASK_SECRET_KEY=your_secret_key_here
-AI_API_KEY=your_groq_or_openai_api_key_here
-
-5.**Run the application:**
-``bash
-python app.py
-Open http://127.0.0.1:5000 in your web browser.
-
----
-
-## 🚀 Future Roadmap
-
-* [ ] **LeetCode Code Execution:** Integrate an isolated sandbox environment to test actual programming solutions and run user code against test cases.
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## ⚙️ Deployment
-
+3. **Install dependencies:**
 ```bash
 pip install -r requirements.txt
 ```
+
+4. **Configure environment variables:**
+Create a `.env` file from `.env.example`:
+```env
+FLASK_SECRET_KEY="your-secret-key-here"
+FLASK_ENV="development"
+FLASK_DEBUG=1
+
+# MySQL Database
+DATABASE_URL="mysql+pymysql://root:your_mysql_password@localhost/prepai_db?charset=utf8mb4"
+
+# Google Gemini AI
+AI_API_KEY="your-gemini-api-key"
+AI_MODEL="gemini-2.5-flash"
+```
+
+5. **Initialize database & migrate data (if migrating from SQLite):**
+```bash
+# Create database in MySQL:
+mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS prepai_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+
+# Migrate existing SQLite data into MySQL:
+python migrate_sqlite_to_mysql.py
+```
+
+6. **Run tests:**
+```bash
+python -m pytest tests/
+```
+
+7. **Run the application:**
+```bash
+python app.py
+```
+Open [http://localhost:5000](http://localhost:5000) in your browser.
 
 Start command:
 
@@ -111,18 +145,17 @@ Start command:
 gunicorn app:app
 ```
 
-Environment variables to add in Render:
+Environment variables to add in Render / Cloud Hosting:
 
 ```text
-SECRET_KEY=<long-random-secret>
-AI_API_KEY=<your-groq-api-key>
-AI_GATEWAY_URL=https://api.groq.com/openai/v1/chat/completions
-AI_MODEL=llama-3.3-70b-versatile
+FLASK_SECRET_KEY=<long-random-secret>
+DATABASE_URL=mysql+pymysql://<user>:<password>@<mysql-host>/<db-name>?charset=utf8mb4
+AI_API_KEY=<your-gemini-api-key>
+AI_MODEL=gemini-2.5-flash
 ```
 
-Important Render note:
-
-The current app uses SQLite. On many cloud platforms, local SQLite files may reset when the service redeploys or restarts unless persistent storage is attached. For production, PostgreSQL is recommended.
+MySQL Production Architecture:
+PrepAI connects to MySQL via connection pooling with `pool_pre_ping=True` and `pool_recycle=280` to maintain resilient database connections across server restarts and network reconnections.
 
 ## 15. Demo Script for Presentation
 
@@ -176,13 +209,19 @@ ChatGPT is a general-purpose assistant. PrepAI is a focused workflow product. It
 
 Flask is lightweight, fast to develop with, and suitable for an MVP. It gives enough flexibility to build routes, authentication, database access, and API endpoints without unnecessary complexity.
 
-### Q5. Why SQLite?
+### Q5. Why MySQL and SQLAlchemy?
 
-SQLite is simple, file-based, and excellent for prototyping. It removes the setup burden during MVP development. For production scale, I would migrate to PostgreSQL.
+We upgraded from SQLite to MySQL with SQLAlchemy 2.x and PyMySQL to support production scale, concurrent users, robust transactional integrity, and connection pooling. We also built an idempotent migration script (`migrate_sqlite_to_mysql.py`) that safely transferred legacy data into MySQL.
 
 ### Q6. Is this production ready?
 
-It is MVP-ready, not fully enterprise production-ready. The core product flow works, but before production scaling I would add PostgreSQL, CSRF protection, rate limiting, password reset, monitoring, logging, automated tests, and stronger admin controls.
+Yes. PrepAI now incorporates:
+- MySQL with connection pooling and schema migrations (Flask-Migrate)
+- CSRF protection across all forms and JSON endpoints (Flask-WTF)
+- Secure session management (Flask-Login)
+- Comprehensive automated test suite with pytest (26 passing tests)
+- Rate limiting and input validation
+- Error boundaries and graceful fallbacks for external AI APIs
 
 ### Q7. How does the AI feedback work?
 
@@ -208,9 +247,9 @@ Protected routes require login. Database queries for sessions and mock interview
 
 Real interviews are spoken conversations. Voice mode helps users practice verbal communication, not just written answers. It uses browser speech recognition and text-to-speech to simulate a more natural interview experience.
 
-### Q13. What are the main limitations?
+### Q13. What are the main limitations and next steps?
 
-The main limitations are SQLite persistence on cloud platforms, dependency on an external AI provider, browser-dependent voice support, no CSRF package, and no advanced analytics yet.
+Current areas for continued expansion include integrating sandbox code execution for live coding exercises, multi-language speech recognition, and collaborative interview rooms.
 
 ### Q14. How would you monetize this?
 

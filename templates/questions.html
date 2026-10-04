@@ -11,43 +11,140 @@
     </div>
   </header>
 
-  <form class="panel form-grid" method="post">
-    <label class="span-all">Topic or role
-      <input name="topic" placeholder="e.g. React hooks, Dynamic programming, Product manager intro" required>
+  <form class="panel form-grid" method="post" id="generate-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label class="span-all" for="topic">Topic or role
+      <input id="topic" name="topic" placeholder="e.g. React hooks, Dynamic programming, Product manager intro" required>
     </label>
-    <label>Type
-      <select name="question_type">
+    <label for="question_type">Type
+      <select id="question_type" name="question_type">
         <option value="technical">Technical</option>
         <option value="behavioral">Behavioral</option>
         <option value="hr">HR</option>
         <option value="system-design">System Design</option>
+        <option value="mcq">MCQ (Multiple Choice)</option>
+        <option value="coding">Coding</option>
+        <option value="conceptual">Conceptual</option>
       </select>
     </label>
-    <label>Difficulty
-      <select name="difficulty">
+    <label for="difficulty">Difficulty
+      <select id="difficulty" name="difficulty">
         <option value="easy">Easy</option>
         <option value="medium" selected>Medium</option>
         <option value="hard">Hard</option>
       </select>
     </label>
-    <label>Count
-      <input type="number" name="count" min="3" max="10" value="5">
+    <label for="count">Count
+      <input id="count" type="number" name="count" min="3" max="10" value="5">
     </label>
-    <button class="button" type="submit">Generate</button>
+    <button class="button" type="submit" id="generate-btn">
+      <span class="btn-text">Generate</span>
+      <span class="spinner hidden" id="generate-spinner"></span>
+    </button>
   </form>
 
   {% if results %}
     <section>
-      <h2>Your questions</h2>
-      <div class="accordion panel">
-        {% for item in results %}
-          <details>
-            <summary><span>{{ loop.index }}.</span> {{ item.question }}</summary>
-            <p>{{ item.answer }}</p>
-          </details>
-        {% endfor %}
+      <div class="results-header">
+        <h2>Your questions</h2>
+        {% if mode == "ai" %}
+          <span class="ai-badge">AI Generated</span>
+        {% endif %}
       </div>
+
+      {% if qtype == "mcq" %}
+        {# MCQ rendering #}
+        <div class="accordion panel">
+          {% for item in results %}
+            <details>
+              <summary><span>{{ loop.index }}.</span> {{ item.question }}</summary>
+              <div class="mcq-options">
+                {% for key in ['A', 'B', 'C', 'D'] %}
+                  <div class="mcq-option {{ 'correct' if key == item.correct_answer else '' }}">
+                    <strong>{{ key }}.</strong> {{ item.options[key] }}
+                    {% if key == item.correct_answer %}<span class="correct-mark">✓ Correct</span>{% endif %}
+                  </div>
+                {% endfor %}
+              </div>
+              <div class="explanation-block">
+                <strong>Explanation:</strong>
+                <p>{{ item.explanation }}</p>
+              </div>
+            </details>
+          {% endfor %}
+        </div>
+
+      {% elif qtype == "coding" %}
+        {# Coding question rendering #}
+        <div class="accordion panel">
+          {% for item in results %}
+            <details>
+              <summary><span>{{ loop.index }}.</span> {{ item.question[:120] }}{% if item.question|length > 120 %}...{% endif %}</summary>
+              <div class="coding-q">
+                <h4>Problem Statement</h4>
+                <p>{{ item.question }}</p>
+                {% if item.constraints %}
+                  <h4>Constraints</h4>
+                  <p>{{ item.constraints }}</p>
+                {% endif %}
+                {% if item.example %}
+                  <h4>Example</h4>
+                  <pre>{{ item.example }}</pre>
+                {% endif %}
+                {% if item.expected_complexity %}
+                  <h4>Expected Complexity</h4>
+                  <p>{{ item.expected_complexity }}</p>
+                {% endif %}
+                {% if item.hint %}
+                  <details class="hint-block">
+                    <summary>💡 Hint</summary>
+                    <p>{{ item.hint }}</p>
+                  </details>
+                {% endif %}
+                {% if item.solution %}
+                  <details class="solution-block">
+                    <summary>📝 Reference Solution</summary>
+                    <pre>{{ item.solution }}</pre>
+                  </details>
+                {% endif %}
+              </div>
+            </details>
+          {% endfor %}
+        </div>
+
+      {% else %}
+        {# Default Q&A rendering #}
+        <div class="accordion panel">
+          {% for item in results %}
+            <details>
+              <summary><span>{{ loop.index }}.</span> {{ item.question }}</summary>
+              <div class="answer-block">
+                <p>{{ item.answer }}</p>
+                {% if item.explanation %}
+                  <div class="explanation-block">
+                    <strong>Why this is a strong answer:</strong>
+                    <p>{{ item.explanation }}</p>
+                  </div>
+                {% endif %}
+              </div>
+            </details>
+          {% endfor %}
+        </div>
+      {% endif %}
     </section>
   {% endif %}
 </section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.getElementById('generate-form')?.addEventListener('submit', function() {
+    const btn = document.getElementById('generate-btn');
+    const spinner = document.getElementById('generate-spinner');
+    const text = btn.querySelector('.btn-text');
+    btn.disabled = true;
+    text.textContent = 'Generating...';
+    spinner.classList.remove('hidden');
+  });
+</script>
 {% endblock %}

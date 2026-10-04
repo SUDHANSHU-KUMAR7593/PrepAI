@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% set shell = true %}
+{% set title = "Bookmarks - PrepAI" %}
+
+{% block content %}
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Bookmarks</h1>
+      <p>Questions you've saved for later review.</p>
+    </div>
+  </header>
+
+  {% if not items %}
+    <div class="empty-state panel">
+      <div class="empty-icon">🔖</div>
+      <h3>No bookmarks yet</h3>
+      <p>Bookmark questions from your sessions to review them later.</p>
+      <a class="button outline" href="{{ url_for('library') }}">Browse library</a>
+    </div>
+  {% else %}
+    <div class="list-panel">
+      {% for item in items %}
+        <div class="session-row">
+          <div>
+            <strong>{{ (item.question.question if item.question is mapping else item.question)[:120] }}{% if (item.question.question if item.question is mapping else item.question)|length > 120 %}...{% endif %}</strong>
+            <span>{{ item.topic }} · {{ item.question_type|replace('-', ' ')|title }} · {{ item.difficulty|title }}</span>
+          </div>
+          <div class="row-right">
+            <a class="button ghost small" href="{{ url_for('session_detail', session_id=item.session_id) }}">View session</a>
+            <a class="button outline small" href="{{ url_for('practice', session_id=item.session_id) }}">Practice</a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

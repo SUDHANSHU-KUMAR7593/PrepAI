@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PrepAI — Interview Preparation Notes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-dark: #3730a3;
+      --slate-900: #0f172a;
+      --slate-800: #1e293b;
+      --slate-700: #334155;
+      --slate-600: #475569;
+      --slate-100: #f1f5f9;
+      --slate-50: #f8fafc;
+      --border-color: #cbd5e1;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      color: var(--slate-800);
+      background-color: var(--slate-50);
+      line-height: 1.6;
+      padding: 30px 15px;
+    }
+
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 36px 40px;
+    }
+
+    .action-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--slate-900);
+      color: #ffffff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      margin-bottom: 28px;
+    }
+
+    .action-bar span {
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    .btn-download {
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .btn-download:hover {
+      background: var(--primary-dark);
+    }
+
+    h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2rem;
+      color: var(--slate-900);
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 1.05rem;
+      color: var(--slate-600);
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid var(--slate-100);
+    }
+
+    h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.35rem;
+      color: var(--slate-900);
+      margin-top: 32px;
+      margin-bottom: 14px;
+      border-left: 4px solid var(--primary);
+      padding-left: 10px;
+    }
+
+    p, li {
+      font-size: 0.96rem;
+      color: var(--slate-700);
+      margin-bottom: 10px;
+    }
+
+    ul, ol {
+      padding-left: 22px;
+      margin-bottom: 16px;
+    }
+
+    li {
+      margin-bottom: 6px;
+    }
+
+    blockquote {
+      background: var(--slate-50);
+      border-left: 4px solid var(--primary);
+      padding: 14px 18px;
+      border-radius: 0 6px 6px 0;
+      margin: 16px 0;
+      font-size: 1rem;
+      color: var(--slate-800);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0 24px 0;
+      font-size: 0.92rem;
+    }
+
+    th, td {
+      border: 1px solid var(--border-color);
+      padding: 10px 14px;
+      text-align: left;
+    }
+
+    th {
+      background: var(--slate-100);
+      color: var(--slate-900);
+      font-weight: 600;
+    }
+
+    code {
+      background: var(--slate-100);
+      color: #9333ea;
+      padding: 2px 5px;
+      border-radius: 4px;
+      font-size: 0.88em;
+      font-family: Consolas, monospace;
+    }
+
+    .qa-box {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-left: 3px solid var(--primary);
+      border-radius: 6px;
+      padding: 14px 16px;
+      margin: 14px 0;
+    }
+
+    .qa-box .question {
+      font-weight: 700;
+      color: var(--slate-900);
+      margin-bottom: 6px;
+      font-size: 1rem;
+    }
+
+    .qa-box .answer {
+      color: var(--slate-700);
+      font-size: 0.95rem;
+    }
+
+    footer {
+      margin-top: 36px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-color);
+      text-align: center;
+      color: var(--slate-600);
+      font-size: 0.85rem;
+    }
+
+    @media print {
+      body {
+        background: #ffffff;
+        padding: 0;
+      }
+      .container {
+        border: none;
+        box-shadow: none;
+        padding: 0;
+        max-width: 100%;
+      }
+      .action-bar {
+        display: none !important;
+      }
+      h2 {
+        page-break-after: avoid;
+      }
+      .qa-box, table {
+        page-break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="action-bar">
+      <span>📄 PrepAI — Interview Notes</span>
+      <button class="btn-download" onclick="window.print()">
+        🖨️ Download / Save as PDF
+      </button>
+    </div>
+
+    <h1>PrepAI — Interview Preparation Notes</h1>
+    <p class="subtitle">A clean, simple-language cheat sheet covering architecture, tech stack, and top interview questions.</p>
+
+    <h2>1. Project Overview (The 30-Second Answer)</h2>
+    <blockquote>
+      <strong>"What is PrepAI?"</strong><br>
+      "PrepAI is a full-stack, production-grade interview preparation platform built with Python (Flask 3.0), MySQL 8.x (SQLAlchemy 2.x), and Google Gemini AI. It allows candidates to generate custom interview questions (including MCQs and coding), practice under real-time countdown pressure with text or voice, receive instant AI evaluations scored on Clarity, Relevance, and Conciseness, bookmark questions, and track preparation progress on a dashboard."
+    </blockquote>
+
+    <h2>2. Tech Stack & Why Chosen</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Component</th>
+          <th>Technology</th>
+          <th>Why Chosen?</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Backend</strong></td>
+          <td>Python / Flask 3.0</td>
+          <td>Lightweight, simple routing, fast prototyping without Django's bloat.</td>
+        </tr>
+        <tr>
+          <td><strong>AI Engine</strong></td>
+          <td>Google Gemini (<code>gemini-2.5-flash</code>)</td>
+          <td>Fast inference, cost-effective, native support for strict JSON schema output.</td>
+        </tr>
+        <tr>
+          <td><strong>Database</strong></td>
+          <td>MySQL 8.x + PyMySQL</td>
+          <td>Production relational database, ACID compliance, connection pooling (<code>pool_pre_ping</code>), multi-user concurrency.</td>
+        </tr>
+        <tr>
+          <td><strong>ORM & Migrations</strong></td>
+          <td>SQLAlchemy 2.x / Flask-Migrate</td>
+          <td>Declarative models, relationship cascading, type safety, automated schema migrations.</td>
+        </tr>
+        <tr>
+          <td><strong>Frontend</strong></td>
+          <td>HTML5, Vanilla CSS, Vanilla JS</td>
+          <td>Fast load times, zero build-step overhead, direct DOM and timer manipulation.</td>
+        </tr>
+        <tr>
+          <td><strong>Voice APIs</strong></td>
+          <td>Web Speech API</td>
+          <td>Built-in browser speech recognition (Speech-to-Text) and synthesis (Text-to-Speech).</td>
+        </tr>
+        <tr>
+          <td><strong>Production</strong></td>
+          <td>Gunicorn WSGI / Render</td>
+          <td>Industry-standard production server for Python web applications.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>3. Core Features & How They Work</h2>
+    <ul>
+      <li><strong>User Authentication:</strong> Email and password registration with salted hashes (<code>generate_password_hash</code>). Protected routes use <code>@login_required</code> via Flask-Login.</li>
+      <li><strong>AI Question Generator (<code>/questions</code>):</strong> Custom questions and model answers across Technical, Behavioral, HR, System Design, MCQ, and Coding.</li>
+      <li><strong>Interactive Practice Mode (<code>/practice/&lt;id&gt;</code>):</strong> Flashcard-style question practice with instant checking for MCQs and accuracy tracking.</li>
+      <li><strong>Timed Mock Interview (<code>/mock-interview</code>):</strong> Client-side countdown timer (e.g. 120s) with automatic submission when time expires.</li>
+      <li><strong>Voice Mode (<code>/voice-interview</code>):</strong> Questions read aloud via <code>speechSynthesis</code> and candidate responses transcribed in real time via <code>SpeechRecognition</code>.</li>
+      <li><strong>Rubric-Based AI Feedback:</strong> 10-point scoring on Clarity, Relevance, and Conciseness, plus strengths, areas for improvement, and ideal educational answers.</li>
+      <li><strong>Question Library & Bookmarks (<code>/library</code>, <code>/bookmarks</code>):</strong> Search, filter by difficulty/type, and bookmark questions for targeted revision.</li>
+      <li><strong>Progress Dashboard (<code>/dashboard</code>):</strong> Displays total questions practiced, unique topics covered, accuracy %, and weakest topic insights.</li>
+    </ul>
+
+    <h2>4. Database Design</h2>
+    <p>Relational tables managed in MySQL via SQLAlchemy 2.x models with composite indexes:</p>
+    <ul>
+      <li><code>users</code>: <code>id</code> (UUID PK), <code>email</code> (unique), <code>password_hash</code>, <code>full_name</code>, <code>target_role</code>, <code>created_at</code>, <code>updated_at</code>.</li>
+      <li><code>question_sessions</code>: <code>id</code>, <code>user_id</code> (FK with CASCADE), <code>topic</code>, <code>question_type</code>, <code>difficulty</code>, <code>questions</code> (JSON text), <code>created_at</code>.</li>
+      <li><code>mock_interviews</code>: <code>id</code>, <code>user_id</code> (FK with CASCADE), <code>topic</code>, <code>role</code>, <code>difficulty</code>, <code>seconds_per_question</code>, <code>items</code> (JSON text), <code>overall_score</code>, <code>status</code>, <code>completed_at</code>, <code>created_at</code>.</li>
+      <li><code>bookmarks</code>: <code>id</code>, <code>user_id</code> (FK with CASCADE), <code>session_id</code> (FK with CASCADE), <code>question_index</code>, <code>note</code>, <code>created_at</code>.</li>
+      <li><code>practice_attempts</code>: <code>id</code>, <code>user_id</code> (FK with CASCADE), <code>session_id</code> (FK), <code>topic</code>, <code>question_type</code>, <code>difficulty</code>, <code>question_text</code>, <code>user_answer</code>, <code>correct_answer</code>, <code>is_correct</code>, <code>score</code>, <code>time_taken_seconds</code>, <code>created_at</code>.</li>
+    </ul>
+    <p><strong>Design Choice:</strong> SQLAlchemy cascade deletes ensure clean tenant cleanup. Composite indexes on <code>(user_id, created_at DESC)</code> provide fast dashboard queries.</p>
+
+    <h2>5. AI Integration & Prompt Engineering</h2>
+    <ul>
+      <li><strong>Guaranteed Valid JSON:</strong> PrepAI uses Gemini's structured output mode (<code>response_schema</code> / JSON output) to guarantee valid JSON without broken formatting.</li>
+      <li><strong>Evaluation Prompt:</strong> Instructs Gemini to act as a strict technical interviewer, scoring Clarity, Relevance, and Conciseness (0–10) while providing actionable feedback.</li>
+      <li><strong>Error & Rate Limit Handling:</strong> Catches HTTP 429 and timeout exceptions, returning clean, non-blocking alert messages to the user.</li>
+    </ul>
+
+    <h2>6. Security & Defensive Coding</h2>
+    <ul>
+      <li><strong>Password Hashing:</strong> Uses Werkzeug's cryptographic salted hashing. Raw passwords are never stored.</li>
+      <li><strong>CSRF Protection:</strong> Flask-WTF protects all web forms and asynchronous JSON endpoints (<code>X-CSRFToken</code> header).</li>
+      <li><strong>Session Hardening:</strong> <code>HttpOnly=True</code> (prevents XSS cookie theft), <code>SameSite="Lax"</code> (prevents CSRF), <code>Secure</code> (HTTPS auto-enabled).</li>
+      <li><strong>Data Isolation:</strong> All queries filter by <code>current_user.id</code> to guarantee tenant isolation.</li>
+      <li><strong>Defensive Clamping:</strong> Custom helpers <code>clamp_int()</code> and <code>clamp_score()</code> prevent negative numbers, buffer overflow, and invalid scores.</li>
+      <li><strong>Fail-Fast Connectivity:</strong> Startup check tests MySQL connectivity immediately, halting with clear diagnostics if MySQL is unavailable.</li>
+      <li><strong>Secret Protection:</strong> API keys reside exclusively in <code>.env</code> and cloud environment variables, protected by <code>.gitignore</code>.</li>
+    </ul>
+
+    <h2>7. Top 10 Common Interview Questions & Simple Answers</h2>
+
+    <div class="qa-box">
+      <div class="question">Q1: "Why did you build PrepAI?"</div>
+      <div class="answer">"Most candidates prepare passively by reading answers, but freeze in real interviews. PrepAI creates active practice with a countdown timer, voice answering, and instant structured feedback."</div>
+    </div>
+
+    <div class="qa-box">
+      <div class="question">Q2: "What is the high-level architecture?"</div>
+      <div class="answer">"It's a modern MVC application. Flask handles routing, sessions, and JSON APIs. MySQL with SQLAlchemy handles persistence with connection pooling. Jinja2 and Vanilla JavaScript handle the UI, timers, and browser speech APIs."</div>
+    </div>
+
+    <div class="qa-box">
+      <div class="question">Q3: "Why choose Flask over Django?"</div>
+      <div class="answer">"Flask is lightweight and unopinionated. It gave us direct control over routes, custom authentication, and fast JSON endpoints without Django's configuration overhead."</div>
+    </div>
+
+    <div class="qa-box">
+      <div class="question">Q4: "Why MySQL? How was the migration handled?"</div>
+      <div class="answer">"We upgraded from SQLite to MySQL to support production concurrency, connection pooling, and multi-user scaling. We engineered a verified, idempotent migration script (<code>migrate_sqlite_to_mysql.py</code>) that safely reads SQLite data, validates row counts, and transfers records into MySQL with zero data loss."</div>
+    </div>
+
+    <div class="qa-box">
+      <div class="question">Q5: "How do you make sure the AI response doesn't break your app?"</div>
+      <div class="answer">"We enforce a strict JSON schema using Gemini's native structured outputs (<code>responseSchema</code>). The API is guaranteed to return valid JSON with our exact expected fields."</div>
+    </div>
+
+    <div class="qa-box">
+      <div class="question">Q6: "How does the voice feature work?"</div>
+      <div class="answer">"It uses the browser's native Web Speech API. <code>SpeechRecognition</code> transcribes the candidate's speech to text in real time, while <code>speechSynthesis</code> reads the questions aloud. No expensive third-party audio service is needed."</div>
+    </div>
+
+    <div class="qa-box">
+      <div class="question">Q7: "What happens if a user's browser doesn't support speech?"</div>
+      <div class="answer">"The app checks for <code>window.SpeechRecognition</code>. If unavailable (e.g., Firefox without flags), it shows a friendly warning and lets the user practice seamlessly in typed mock interview mode."</div>
+    </div>
+
+    <div class="qa-box">
+      <div class="question">Q8: "How do you secure user data and sessions?"</div>
+      <div class="answer">"Passwords use Werkzeug salted hashes. Cookie sessions are hardened with <code>HttpOnly</code> and <code>SameSite</code>. CSRF tokens protect all state-changing endpoints. All database operations are scoped to <code>current_user.id</code> so users can only view their own data."</div>
+    </div>
+
+    <div class="qa-box">
+      <div class="question">Q9: "Why use PrepAI instead of ChatGPT?"</div>
+      <div class="answer">"ChatGPT is a generic chat box with no structure. PrepAI provides a complete interview workflow: countdown timers that simulate pressure, voice input/output, a standardized 3-criteria grading rubric, and progress tracking."</div>
+    </div>
+
+    <div class="qa-box">
+      <div class="question">Q10: "What are the current limitations and what would you build next?"</div>
+      <div class="answer">"Current areas for expansion: integrating sandboxed code execution (e.g. Pyodide or isolated Docker runners) for live coding challenges, and collaborative peer mock interviews."</div>
+    </div>
+
+    <footer>
+      PrepAI Interview Notes • Open in browser and click "Download / Save as PDF"
+    </footer>
+  </div>
+
+</body>
+</html>

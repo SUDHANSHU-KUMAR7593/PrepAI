@@ -16,12 +16,81 @@
   </header>
 
   <div class="stats">
-    <article><span>Sessions</span><strong>{{ sessions|length }}</strong></article>
-    <article><span>Questions practiced</span><strong>{{ total_questions }}</strong></article>
-    <article><span>Unique topics</span><strong>{{ topics }}</strong></article>
+    <article>
+      <span>Sessions</span>
+      <strong>{{ sessions|length }}</strong>
+    </article>
+    <article>
+      <span>Questions practiced</span>
+      <strong>{{ total_questions }}</strong>
+    </article>
+    <article>
+      <span>Unique topics</span>
+      <strong>{{ topics }}</strong>
+    </article>
+    <article>
+      <span>Practice attempts</span>
+      <strong>{{ total_attempts }}</strong>
+    </article>
+    <article>
+      <span>Accuracy</span>
+      <strong>{{ accuracy }}%</strong>
+    </article>
+    <article>
+      <span>Bookmarks</span>
+      <strong>{{ bookmark_count }}</strong>
+    </article>
   </div>
 
-  <section>
+  {% if topic_performance %}
+  <section class="section-block">
+    <h2>Performance by topic</h2>
+    <p class="section-subtitle">Topics sorted by accuracy — weakest first. Focus on these areas.</p>
+    <div class="topic-grid">
+      {% for tp in topic_performance[:8] %}
+      <div class="topic-card {{ 'weak' if tp.accuracy < 50 else 'strong' if tp.accuracy >= 80 else '' }}">
+        <div class="topic-card-header">
+          <strong>{{ tp.topic|title }}</strong>
+          <span class="topic-badge {{ 'badge-danger' if tp.accuracy < 50 else 'badge-success' if tp.accuracy >= 80 else 'badge-warning' }}">{{ tp.accuracy }}%</span>
+        </div>
+        <div class="topic-meta">
+          <span>{{ tp.total }} attempts</span>
+          <span>{{ tp.correct }} correct</span>
+          {% if tp.avg_score %}<span>Avg: {{ tp.avg_score }}/10</span>{% endif %}
+        </div>
+        <div class="topic-bar">
+          <div class="topic-bar-fill" style="width: {{ tp.accuracy }}%"></div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  {% if interviews %}
+  <section class="section-block">
+    <h2>Recent mock interviews</h2>
+    <div class="list-panel">
+      {% for iv in interviews %}
+      <div class="session-row">
+        <div>
+          <strong>{{ iv.topic }}</strong>
+          <span>{{ iv.question_type|replace("-", " ")|title }} · {{ iv.difficulty|title }} · {{ iv.num_questions }} questions</span>
+        </div>
+        <div class="row-right">
+          {% if iv.overall_score is not none %}
+            <span class="score-pill {{ 'score-high' if iv.overall_score >= 7 else 'score-mid' if iv.overall_score >= 4 else 'score-low' }}">{{ iv.overall_score }}/10</span>
+          {% endif %}
+          <span class="status-pill {{ iv.status }}">{{ iv.status|replace("_", " ")|title }}</span>
+          <time>{{ iv.created_at[:10] }}</time>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <section class="section-block">
     <h2>Recent sessions</h2>
     <div class="list-panel">
       {% if not sessions %}
@@ -31,12 +100,15 @@
         </div>
       {% endif %}
       {% for session in sessions %}
-        <div class="session-row">
+        <div class="session-row clickable" onclick="window.location='{{ url_for('session_detail', session_id=session.id) }}'">
           <div>
             <strong>{{ session.topic }}</strong>
             <span>{{ session.question_type|replace("-", " ")|title }} · {{ session.difficulty|title }} · {{ session.questions|length }} questions</span>
           </div>
-          <time>{{ session.created_at[:10] }}</time>
+          <div class="row-right">
+            <a class="button ghost small" href="{{ url_for('practice', session_id=session.id) }}" onclick="event.stopPropagation()">Practice</a>
+            <time>{{ session.created_at[:10] }}</time>
+          </div>
         </div>
       {% endfor %}
     </div>

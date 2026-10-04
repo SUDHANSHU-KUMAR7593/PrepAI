@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% set shell = true %}
+{% set title = "Question Library - PrepAI" %}
+
+{% block content %}
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Question Library</h1>
+      <p>Browse, search, and revisit all your generated question sets.</p>
+    </div>
+    <div class="actions">
+      <a class="button" href="{{ url_for('questions') }}">Generate new</a>
+    </div>
+  </header>
+
+  <form class="filter-bar panel" method="get" action="{{ url_for('library') }}">
+    <div class="filter-group">
+      <input type="text" name="search" placeholder="Search by topic..." value="{{ search }}" class="filter-input">
+      <select name="type" class="filter-select">
+        <option value="">All types</option>
+        {% for t in ['technical', 'behavioral', 'hr', 'system-design', 'mcq', 'coding', 'conceptual'] %}
+          <option value="{{ t }}" {{ 'selected' if filter_type == t else '' }}>{{ t|replace('-', ' ')|title }}</option>
+        {% endfor %}
+      </select>
+      <select name="difficulty" class="filter-select">
+        <option value="">All difficulties</option>
+        {% for d in ['easy', 'medium', 'hard'] %}
+          <option value="{{ d }}" {{ 'selected' if filter_diff == d else '' }}>{{ d|title }}</option>
+        {% endfor %}
+      </select>
+      <button class="button" type="submit">Filter</button>
+    </div>
+  </form>
+
+  {% if not sessions %}
+    <div class="empty-state panel">
+      <div class="empty-icon">📚</div>
+      <h3>No questions found</h3>
+      <p>{% if search or filter_type or filter_diff %}No questions match your filters. Try broadening your search.{% else %}Generate your first set to build your library.{% endif %}</p>
+      <a class="button outline" href="{{ url_for('questions') }}">Generate questions</a>
+    </div>
+  {% else %}
+    <div class="library-grid">
+      {% for session in sessions %}
+        <article class="library-card panel" onclick="window.location='{{ url_for('session_detail', session_id=session.id) }}'">
+          <div class="library-card-header">
+            <h3>{{ session.topic }}</h3>
+            <div class="card-badges">
+              <span class="badge badge-type">{{ session.question_type|replace('-', ' ')|title }}</span>
+              <span class="badge badge-diff-{{ session.difficulty }}">{{ session.difficulty|title }}</span>
+            </div>
+          </div>
+          <p class="card-meta">{{ session.questions|length }} questions · {{ session.created_at[:10] }}</p>
+          <div class="card-preview">
+            {% for q in session.questions[:3] %}
+              <div class="preview-q">{{ loop.index }}. {{ (q.question if q is mapping else q)[:80] }}{% if (q.question if q is mapping else q)|length > 80 %}...{% endif %}</div>
+            {% endfor %}
+            {% if session.questions|length > 3 %}
+              <div class="preview-more">+{{ session.questions|length - 3 }} more</div>
+            {% endif %}
+          </div>
+          <div class="card-actions">
+            <a class="button ghost small" href="{{ url_for('practice', session_id=session.id) }}" onclick="event.stopPropagation()">Practice</a>
+            <a class="button outline small" href="{{ url_for('session_detail', session_id=session.id) }}" onclick="event.stopPropagation()">View all</a>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+
+    {% if pagination.pages > 1 %}
+      <nav class="pagination">
+        {% if pagination.has_prev %}
+          <a class="button ghost small" href="{{ url_for('library', page=pagination.prev_num, search=search, type=filter_type, difficulty=filter_diff) }}">← Previous</a>
+        {% endif %}
+        <span class="page-info">Page {{ pagination.page }} of {{ pagination.pages }}</span>
+        {% if pagination.has_next %}
+          <a class="button ghost small" href="{{ url_for('library', page=pagination.next_num, search=search, type=filter_type, difficulty=filter_diff) }}">Next →</a>
+        {% endif %}
+      </nav>
+    {% endif %}
+  {% endif %}
+</section>
+{% endblock %}
